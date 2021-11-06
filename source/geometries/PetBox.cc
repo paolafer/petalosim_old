@@ -272,6 +272,20 @@ void PetBox::BuildBox()
   tile_->Construct();
   tile_thickn_ = tile_->GetDimensions().z();
 
+
+  // Coincidence plane (tile5): FBK, detector plane: Hamamatsu
+  tile5_ = new TileFBK();
+  tile5_->SetPDE(sipm_pde_);
+  dist_dice_flange5_ = 21.05*mm;
+
+  tile5_->SetBoxGeom(1);
+  tile5_->SetTileVisibility(tile_vis_);
+  tile5_->SetTileReflectivity(tile_refl_);
+  tile5_->SetTimeBinning(time_binning_);
+
+  tile5_->Construct();
+  tile5_thickn_ = tile5_->GetDimensions().z();
+
   // 2 ACTIVE REGIONS
   G4double active_z_pos_max = box_size_ / 2. - box_thickness_ - dist_dice_flange_ - tile_thickn_;
   if (tile_type_ == "HamamatsuBlue")
@@ -279,9 +293,15 @@ void PetBox::BuildBox()
     active_z_pos_max = box_size_ / 2. - box_thickness_ - dist_dice_flange_ - tile_thickn_ - dist_sipms_panel_sipms_ - panel_thickness_ - wls_depth_;
   }
 
+  // Tile5 FBK
+  G4double active_z_pos_max5 = box_size_/2. - box_thickness_ - dist_dice_flange5_ - tile5_thickn_;
+
   G4double active_z_pos_min = ih_z_size_ / 2. + dist_ihat_entry_panel_ + panel_thickness_;
   G4double active_depth = active_z_pos_max - active_z_pos_min;
   G4double active_z_pos = active_z_pos_min + active_depth / 2.;
+
+  G4double active_depth5 = active_z_pos_max5 - active_z_pos_min;
+  G4double active_z_pos5 = active_z_pos_min + active_depth5/2.;
 
   G4Box *active_solid =
       new G4Box("ACTIVE", dist_lat_panels_ / 2., dist_lat_panels_ / 2., active_depth / 2.);
@@ -289,16 +309,24 @@ void PetBox::BuildBox()
       new G4LogicalVolume(active_solid, LXe, "ACTIVE");
   new G4PVPlacement(0, G4ThreeVector(0., 0., -active_z_pos), active_logic,
                     "ACTIVE", LXe_logic_, false, 1, false);
-  new G4PVPlacement(0, G4ThreeVector(0., 0., active_z_pos), active_logic,
+
+  G4Box* active_solid5 =
+        new G4Box("ACTIVE", dist_lat_panels_/2., dist_lat_panels_/2., active_depth5/2.);
+  G4LogicalVolume* active_logic5 =
+        new G4LogicalVolume(active_solid5, LXe, "ACTIVE");
+  new G4PVPlacement(0, G4ThreeVector(0., 0., active_z_pos5), active_logic5,
                     "ACTIVE", LXe_logic_, false, 2, false);
 
   // Set the ACTIVE volume as an ionization sensitive det
   IonizationSD *ionisd = new IonizationSD("/PETALO/ACTIVE");
   active_logic->SetSensitiveDetector(ionisd);
+  active_logic5->SetSensitiveDetector(ionisd);
+  
   G4SDManager::GetSDMpointer()->AddNewDetector(ionisd);
 
   // Limit the step size in ACTIVE volume for better tracking precision
   active_logic->SetUserLimits(new G4UserLimits(max_step_size_));
+  active_logic5->SetUserLimits(new G4UserLimits(max_step_size_));
 
   // PYREX PANELS BETWEEN THE INTERNAL HAT AND THE ACTIVE REGIONS
   G4Box *entry_panel_solid =
@@ -491,14 +519,16 @@ void PetBox::BuildSensors()
     }
   }
 
+  G4LogicalVolume* tile5_logic = tile5_->GetLogicalVolume();
+  G4double z_pos5 = -box_size_/2. + box_thickness_ + dist_dice_flange5_ + tile5_thickn_/2.;
   G4RotationMatrix rot;
   rot.rotateY(pi);
 
   /// ASYMMETRIC GEOMETRY
   vol_name = "TILE_" + std::to_string(copy_no);
-  G4double x_pos = full_row_size_ / 2. - tile_size_x / 2.;
-  G4double y_pos = full_col_size_ / 2. - tile_size_y / 2.;
-  new G4PVPlacement(G4Transform3D(rot, G4ThreeVector(x_pos, y_pos, -z_pos)), tile_logic,
+  G4double x_pos = 0.;
+  G4double y_pos = 0.;
+  new G4PVPlacement(G4Transform3D(rot, G4ThreeVector(x_pos, y_pos, -z_pos5)), tile5_logic,
                     vol_name, LXe_logic_, false, copy_no, false);
 
   /// SYMMETRIC GEOMETRY

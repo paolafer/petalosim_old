@@ -34,7 +34,8 @@ public:
   /// Generate a vertex within a given region of the geometry
   G4ThreeVector GenerateVertex(const G4String &region) const;
 
-  TileGeometryBase *tile_;
+  TileGeometryBase* tile_;
+  TileGeometryBase* tile5_;
 
 private:
   void Construct();
@@ -64,6 +65,7 @@ private:
 
   G4double n_tile_rows_, n_tile_columns_;
   G4double tile_thickn_, full_row_size_, full_col_size_;
+  G4double tile5_thickn_;
 
   G4double dist_lat_panels_;
 
@@ -77,7 +79,7 @@ private:
   G4double horiz_lat_panel_z_size_, horiz_lat_panel_y_pos_;
   G4double vert_lat_panel_z_size_;
 
-  G4double dist_dice_flange_;
+  G4double dist_dice_flange_, dist_dice_flange5_;
   G4double panel_sipm_xy_size_, dist_sipms_panel_sipms_;
   G4double wls_depth_;
 

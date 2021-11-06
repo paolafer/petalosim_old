@@ -115,7 +115,7 @@ G4bool ToFSD::ProcessHits(G4Step *step, G4TouchableHistory *)
 
         hit_tof = new SensorHit();
         hit_tof->SetPmtID(-pmt_id);
-        hit_tof->SetBinSize(5 * picosecond);
+        hit_tof->SetBinSize(1 * nanosecond);
         hit_tof->SetPosition(touchable->GetTranslation());
         HC_->insert(hit_tof);
       }

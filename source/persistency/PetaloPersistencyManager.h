@@ -81,7 +81,6 @@ private:
   G4bool first_evt_; ///< true only for the first event of the run
 
   G4int thr_charge_;
-  G4double tof_time_;
   G4bool sns_only_;
   G4bool save_tot_charge_;
   HDF5Writer *h5writer_; ///< Event writer to hdf5 file

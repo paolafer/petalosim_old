@@ -1,11 +1,10 @@
 ### GEOMETRY
 /Geometry/PetBox/visibility true
-/Geometry/PetBox/tile_type FBK
+/Geometry/PetBox/tile_type HamamatsuVUV
 
 /Geometry/PetBox/tile_vis true
 /Geometry/PetBox/tile_refl 0.
-/Geometry/PetBox/sipm_time_binning 1. microsecond
-/Geometry/PetBox/sipm_pde 0.5
+/Geometry/PetBox/sipm_time_binning 1. millisecond
 
 ### GENERATOR
 /Generator/Back2back/region CENTER
@@ -18,6 +17,8 @@
 /process/optical/processActivation Scintillation true
 /process/optical/processActivation Cerenkov      true
 
+/Actions/PetaloEventAction/energy_threshold 509 keV
+
 ### VERBOSITIES
 /run/verbose 0
 /event/verbose 0
@@ -27,5 +28,5 @@
 
 ### OUTPUT FILE
 /nexus/persistency/start_id 0
-/nexus/persistency/outputFile petbox.pet
+/nexus/persistency/outputFile petbox
 

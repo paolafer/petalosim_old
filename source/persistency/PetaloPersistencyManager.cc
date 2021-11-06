@@ -45,7 +45,7 @@ PetaloPersistencyManager::PetaloPersistencyManager():
   PersistencyManagerBase(), msg_(0), ready_(false), store_evt_(true),
   store_steps_(false), interacting_evt_(false), event_type_("other"),
   saved_evts_(0), interacting_evts_(0), nevt_(0), start_id_(0), first_evt_(true),
-  thr_charge_(0), tof_time_(50.*nanosecond), sns_only_(false),
+  thr_charge_(0), sns_only_(false),
   save_tot_charge_(true), h5writer_(0)
 {
   msg_ = new G4GenericMessenger(this, "/nexus/persistency/");
@@ -57,12 +57,6 @@ PetaloPersistencyManager::PetaloPersistencyManager():
   msg_->DeclareProperty("thr_charge", thr_charge_, "Threshold for the charge saved in file.");
   msg_->DeclareProperty("sns_only", sns_only_, "If true, no true information is saved.");
   msg_->DeclareProperty("save_tot_charge", save_tot_charge_, "If true, total charge is saved.");
-
-  G4GenericMessenger::Command& time_cmd =
-    msg_->DeclareProperty("tof_time", tof_time_, "Time saved in tof table per sensor");
-  time_cmd.SetUnitCategory("Time");
-  time_cmd.SetParameterName("tof_time", false);
-  time_cmd.SetRange("tof_time>0.");
 
   init_macro_ = "";
   macros_.clear();
@@ -374,15 +368,9 @@ void PetaloPersistencyManager::StoreSensorHits(G4VHitsCollection* hc)
     double binsize_tof = hitTof->GetBinSize();
 
     for (it = wvfmTof.begin(); it != wvfmTof.end(); ++it) {
-
-      if (((*it).first) <= tof_time_){
         unsigned int time_bin_tof = (unsigned int)((*it).first/binsize_tof+0.5);
         unsigned int charge_tof = (unsigned int)((*it).second+0.5);
         h5writer_->WriteSensorTofInfo(nevt_, hitTof->GetPmtID(), time_bin_tof, charge_tof);
-      }
-      else {
-        break;
-      }
     }
 
     /*
