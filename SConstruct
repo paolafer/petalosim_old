@@ -256,6 +256,7 @@ if not env['LIBPATH']:
     env.Append( CPPPATH = [os.environ['NEST_DIR']+'/include/Detectors'] )
     env.Append( CPPPATH = [os.environ['NEST_DIR']+'/include/NEST'] )
     env.Append( CPPPATH = [os.environ['NEST_DIR']+'/include/NEST/G4'] )
+    env.Append( CPPPATH = [os.environ['NEST_DIR']+'/include/NEST/gcem_incl'] )
     env.Append(LIBS = ['NESTCore', 'NESTG4'])
 
     if not conf.CheckCXXHeader('NEST.hh'):
