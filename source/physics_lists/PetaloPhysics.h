@@ -31,7 +31,9 @@ public:
 private:
   G4bool risetime_; ///< Rise time for LYSO
 
-  G4bool noCompt_; ///< Switch off Compton scattering
+  G4bool noCompt_; ///< Switch on/off Compton scattering
+
+  G4bool nest_; ///< Switch on/off NEST
 
   G4GenericMessenger *msg_;
   WavelengthShifting *wls_;
