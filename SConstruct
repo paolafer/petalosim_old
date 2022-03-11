@@ -250,6 +250,21 @@ if not env['LIBPATH']:
         Abort('NEXUS libraries could not be found.')
 
 
+    ## NEST configuration --------------------------
+    env.Append( LIBPATH = [os.environ['NEST_DIR']+'/lib'] )
+    env.Append( CPPPATH = [os.environ['NEST_DIR']+'/include'] )
+    env.Append( CPPPATH = [os.environ['NEST_DIR']+'/include/Detectors'] )
+    env.Append( CPPPATH = [os.environ['NEST_DIR']+'/include/NEST'] )
+    env.Append( CPPPATH = [os.environ['NEST_DIR']+'/include/NEST/G4'] )
+    env.Append(LIBS = ['NESTCore', 'NESTG4'])
+
+    if not conf.CheckCXXHeader('NEST.hh'):
+        Abort('NEST headers not found.')
+
+    if not conf.CheckLib(library='NESTG4', language='CXX', autoadd=0):
+        Abort('NEST libraries could not be found.')
+
+
 ## ##################################################################
 
     ## Force nexus to use C++17 standard
