@@ -1,0 +1,39 @@
+
+### GEOMETRY
+
+/Geometry/FullRingInfinity/depth 3. cm
+/Geometry/FullRingInfinity/pitch 7. mm
+/Geometry/FullRingInfinity/inner_radius 380. mm
+/Geometry/FullRingInfinity/sipm_rows 278
+/Geometry/FullRingInfinity/instrumented_faces 1
+/Geometry/FullRingInfinity/specific_vertex 0. 0. 0. cm
+
+/Geometry/SiPMpet/efficiency 0.3
+/Geometry/SiPMpet/visibility true
+/Geometry/SiPMpet/time_binning 5. picosecond
+/Geometry/SiPMpet/size 6. mm
+
+
+### GENERATOR
+/Generator/Back2back/region AD_HOC
+#/Generator/Back2back/region CUSTOM
+
+/process/optical/processActivation Scintillation false
+/PhysicsList/Petalo/nest true
+
+
+### VERBOSITIES
+/run/verbose 1
+/event/verbose 0
+/tracking/verbose 0
+
+/process/em/verbose 0
+
+/nexus/random_seed 132312
+
+### OUTPUT FILE
+
+/nexus/persistency/start_id 0
+/nexus/persistency/sns_only false
+/nexus/persistency/tof_time 5. nanosecond
+/nexus/persistency/outputFile full_body_nest

@@ -1,0 +1,23 @@
+### PHYSICS
+/PhysicsList/RegisterPhysics G4EmStandardPhysics_option4
+/PhysicsList/RegisterPhysics G4OpticalPhysics
+/PhysicsList/RegisterPhysics PetaloPhysics
+/PhysicsList/RegisterPhysics G4DecayPhysics
+/PhysicsList/RegisterPhysics G4RadioactiveDecayPhysics
+/PhysicsList/RegisterPhysics G4StepLimiterPhysics
+
+### GEOMETRY
+/nexus/RegisterGeometry FullRingInfinity
+
+### GENERATOR
+/nexus/RegisterGenerator Back2backGammas
+
+### ACTIONS
+/nexus/RegisterRunAction PetaloRunAction
+/nexus/RegisterEventAction PetaloEventAction
+/nexus/RegisterTrackingAction PetaloTrackingAction
+/nexus/RegisterStackingAction PetNESTStackingAction
+
+/nexus/RegisterPersistencyManager PetaloPersistencyManager
+
+/nexus/RegisterMacro macros/PET_full_body_nest.config.mac
