@@ -10,6 +10,7 @@
 #include "FullRingInfinity.h"
 #include "SiPMpetVUV.h"
 #include "PetOpticalMaterialProperties.h"
+#include "ChargeSD.h"
 
 #include "nexus/SpherePointSampler.h"
 #include "nexus/IonizationSD.h"
@@ -44,6 +45,7 @@ FullRingInfinity::FullRingInfinity() :
   sipm_pitch_(4. * mm),
   n_sipm_rows_(16),
   instr_faces_(2),
+  charge_det_(false),
   kapton_thickn_(0.3 * mm),
   lxe_depth_(5. * cm),
   offset_(0.1 * mm),
@@ -92,6 +94,7 @@ FullRingInfinity::FullRingInfinity() :
 
   msg_->DeclareProperty("sipm_rows", n_sipm_rows_, "Number of SiPM rows");
   msg_->DeclareProperty("instrumented_faces", instr_faces_, "Number of instrumented faces");
+  msg_->DeclareProperty("charge_detector", charge_det_, "True if charge is detected");
   msg_->DeclareProperty("phantom", phantom_, "True if spherical physical phantom is used");
 
   msg_->DeclarePropertyWithUnit("specific_vertex", "mm",  specific_vertex_,
@@ -334,6 +337,16 @@ void FullRingInfinity::BuildSensors()
   G4LogicalVolume* chdet_logic =
     new G4LogicalVolume(chdet_solid, LXe_, "CHARGE_DET");
 
+  G4String sdname = "/WIRE/ChargeDet";
+  G4SDManager* sdmgr = G4SDManager::GetSDMpointer();
+  if (!sdmgr->FindSensitiveDetector(sdname, false))
+  {
+    ChargeSD* chargesd = new ChargeSD(sdname);
+    chargesd->SetTimeBinning(1.*microsecond);
+    G4SDManager::GetSDMpointer()->AddNewDetector(chargesd);
+    chdet_logic->SetSensitiveDetector(chargesd);
+  }
+
   //G4double sipm_pitch = sipm_dim.x() + 1. * mm;
 
   G4int n_sipm_int = 2 * pi * inner_radius_ / sipm_pitch_;
@@ -356,7 +369,7 @@ void FullRingInfinity::BuildSensors()
     G4double z_dimension = -axial_length_ / 2. + (j + 1. / 2.) * sipm_pitch_;
     G4ThreeVector position(0., radius, z_dimension);
     copy_no += 1;
-    G4String vol_name       = "SIPM_" + std::to_string(copy_no);
+    G4String vol_name = "SIPM_" + std::to_string(copy_no);
     if (instr_faces_ == 2)
     {
       new G4PVPlacement(G4Transform3D(rot, position), sipm_logic,
@@ -411,8 +424,10 @@ void FullRingInfinity::BuildSensors()
     G4String chdet_vol_name = "CHARGE_DET_" + std::to_string(copy_no);
     new G4PVPlacement(G4Transform3D(rot, position), sipm_logic,
                       vol_name, active_logic_, false, copy_no, false);
-    new G4PVPlacement(G4Transform3D(rot, chdet_position), chdet_logic,
-                      chdet_vol_name, active_logic_, false, copy_no, false);
+    if (charge_det_) {
+      new G4PVPlacement(G4Transform3D(rot, chdet_position), chdet_logic,
+                        chdet_vol_name, active_logic_, false, copy_no, false);
+    }
     // G4cout << "INSERT INTO ChannelMatrixP7R410Z1950mm (MinRun, MaxRun, SensorID, PhiNumber, ZNumber) VALUES (0, 100000, "
     //	     << copy_no << ", 0, " << j << ");" << G4endl;
     //G4cout << "INSERT INTO ChannelPositionP7R410Z1950mm (MinRun, MaxRun, SensorID, X, Y, Z) VALUES (0, 100000, "
@@ -430,8 +445,10 @@ void FullRingInfinity::BuildSensors()
       chdet_vol_name = "CHARGE_DET_" + std::to_string(copy_no);
       new G4PVPlacement(G4Transform3D(rot, position), sipm_logic,
                         vol_name, active_logic_, false, copy_no, false);
-      new G4PVPlacement(G4Transform3D(rot, chdet_position), chdet_logic,
-                        chdet_vol_name, active_logic_, false, copy_no, false);
+      if (charge_det_) {
+        new G4PVPlacement(G4Transform3D(rot, chdet_position), chdet_logic,
+                          chdet_vol_name, active_logic_, false, copy_no, false);
+      }
       //	G4cout << "INSERT INTO ChannelMatrixP7R410Z1950mm (MinRun, MaxRun, SensorID, PhiNumber, ZNumber) VALUES (0, 100000, "
       //       << copy_no << ", " << i-1 << ", " << j << ");" << G4endl;
       //	G4cout << "INSERT INTO ChannelPositionP7R410Z1950mm (MinRun, MaxRun, SensorID, X, Y, Z) VALUES (0, 100000, "
