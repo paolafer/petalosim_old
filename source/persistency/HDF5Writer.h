@@ -43,6 +43,7 @@ public:
                  const char *proc_name,
                  float initial_x, float initial_y, float initial_z,
                  float final_x, float final_y, float final_z);
+  void WriteChargeDataInfo(int evt_number, unsigned int sensor_id, unsigned int charge);
 
 private:
   size_t file_; ///< HDF5 file
@@ -60,6 +61,7 @@ private:
   size_t particleInfoTable_;
   size_t snsPosTable_;
   size_t stepTable_;
+  size_t chargeDataTable_;
 
   size_t memtypeRun_;
   size_t memtypeSnsData_;
@@ -68,6 +70,7 @@ private:
   size_t memtypeParticleInfo_;
   size_t memtypeSnsPos_;
   size_t memtypeStep_;
+  size_t memtypeChargeData_;
 
   size_t irun_;     ///< counter for configuration parameters
   size_t ismp_;     ///< counter for written waveform samples
@@ -76,6 +79,7 @@ private:
   size_t ipart_;    ///< counter for particle information
   size_t ipos_;     ///< counter for sensor positions
   size_t istep_;    ///< counter for steps
+  size_t icharge_;  ///< counter for charge
 };
 
 #endif

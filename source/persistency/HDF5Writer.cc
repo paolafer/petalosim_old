@@ -62,6 +62,10 @@ void HDF5Writer::Open(std::string fileName, bool debug)
   memtypeSnsPos_ = createSensorPosType();
   snsPosTable_ = createTable(group_, sns_pos_table_name, memtypeSnsPos_);
 
+  std::string charge_data_table_name = "charge_response";
+  memtypeChargeData_ = createChargeDataType();
+  chargeDataTable_ = createTable(group_, charge_data_table_name, memtypeChargeData_);
+
   if (debug) {
     std::string debug_group_name = "/DEBUG";
     size_t debug_group = createGroup(file_, debug_group_name);
@@ -214,4 +218,15 @@ void HDF5Writer::WriteStep(int evt_number,
   writeStep(&step, stepTable_, memtypeStep_, istep_);
 
   istep_++;
+}
+
+void HDF5Writer::WriteChargeDataInfo(int evt_number, unsigned int sensor_id, unsigned int charge)
+{
+  sns_data_t chargeData;
+  chargeData.event_id = evt_number;
+  chargeData.sensor_id = sensor_id;
+  chargeData.charge = charge;
+  writeSnsData(&chargeData, chargeDataTable_, memtypeChargeData_, icharge_);
+
+  icharge_++;
 }
