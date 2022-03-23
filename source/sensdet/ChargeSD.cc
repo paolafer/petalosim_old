@@ -49,7 +49,7 @@ G4bool ChargeSD::ProcessHits(G4Step *step, G4TouchableHistory *)
     return false;
 
   const G4VTouchable* touchable =
-      step->GetPostStepPoint()->GetTouchable();
+      step->GetPreStepPoint()->GetTouchable();
 
   G4int sns_id = FindSensorID(touchable);
 
