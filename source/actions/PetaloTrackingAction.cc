@@ -15,6 +15,8 @@
 #include "nexus/TrajectoryMap.h"
 #include "nexus/FactoryBase.h"
 
+#include <NESTProc.hh>
+
 #include <G4Track.hh>
 #include <G4TrackingManager.hh>
 #include <G4Trajectory.hh>
@@ -42,7 +44,8 @@ PetaloTrackingAction::~PetaloTrackingAction()
 void PetaloTrackingAction::PreUserTrackingAction(const G4Track* track)
 {
   // Do nothing if the track is an optical photon
-  if (track->GetDefinition() == G4OpticalPhoton::Definition()) {
+  if (track->GetDefinition() == G4OpticalPhoton::Definition() ||
+      track->GetDefinition() == NEST::NESTThermalElectron::Definition()) {
       fpTrackingManager->SetStoreTrajectory(false);
       return;
   }
