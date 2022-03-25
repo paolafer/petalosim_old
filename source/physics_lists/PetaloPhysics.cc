@@ -10,8 +10,8 @@
 #include "WavelengthShifting.h"
 #include "PositronAnnihilation.h"
 
-#include "NESTProc.hh"
-#include "PetaloDetector.hh"
+#include <NESTProc.hh>
+#include <PetaloDetector.hh>
 
 #include <G4Scintillation.hh>
 #include <G4GenericMessenger.hh>

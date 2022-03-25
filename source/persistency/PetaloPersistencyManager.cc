@@ -35,7 +35,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include "CLHEP/Units/SystemOfUnits.h"
+#include <CLHEP/Units/SystemOfUnits.h>
 
 using namespace nexus;
 using namespace CLHEP;
@@ -418,7 +418,6 @@ void PetaloPersistencyManager::StoreChargeHits(G4VHitsCollection* hc)
     if (pos_it == charge_posvec_.end()) {
       std::string sdname = hits->GetSDname();
       G4ThreeVector xyz  = hit->GetPosition();
-      G4cout << "Writing " << hit->GetSensorID() << G4endl;
       h5writer_->WriteSensorPosInfo((unsigned int)hit->GetSensorID(), sdname.c_str(),
                                     (float)xyz.x(), (float)xyz.y(), (float)xyz.z());
       charge_posvec_.push_back(hit->GetSensorID());
