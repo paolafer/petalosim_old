@@ -251,12 +251,12 @@ if not env['LIBPATH']:
 
 
     ## NEST configuration --------------------------
-    env.Append( LIBPATH = [os.environ['NEST_DIR']+'/lib'] )
-    env.Append( CPPPATH = [os.environ['NEST_DIR']+'/include'] )
-    env.Append( CPPPATH = [os.environ['NEST_DIR']+'/include/Detectors'] )
-    env.Append( CPPPATH = [os.environ['NEST_DIR']+'/include/NEST'] )
-    env.Append( CPPPATH = [os.environ['NEST_DIR']+'/include/NEST/G4'] )
-    env.Append( CPPPATH = [os.environ['NEST_DIR']+'/include/NEST/gcem_incl'] )
+    env.Append( LIBPATH = [os.environ['NEST_LIB']] )
+    env.Append( CPPPATH = [os.environ['NEST_INC']] )
+    env.Append( CPPPATH = [os.environ['NEST_INC']+'/Detectors'] )
+    env.Append( CPPPATH = [os.environ['NEST_INC']+'/NEST'] )
+    env.Append( CPPPATH = [os.environ['NEST_INC']+'/NEST/G4'] )
+    env.Append( CPPPATH = [os.environ['NEST_INC']+'/NEST/gcem_incl'] )
     env.Append(LIBS = ['NESTCore', 'NESTG4'])
 
     if not conf.CheckCXXHeader('NEST.hh'):
