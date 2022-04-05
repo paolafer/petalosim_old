@@ -20,7 +20,7 @@
 HDF5Writer::HDF5Writer():
   file_(0), irun_(0), ismp_(0),
   ismp_tof_(0), ihit_(0),
-  ipart_(0), ipos_(0), istep_(0)
+  ipart_(0), ipos_(0), istep_(0), icharge_(0)
 {
 }
 
@@ -222,11 +222,11 @@ void HDF5Writer::WriteStep(int evt_number,
 
 void HDF5Writer::WriteChargeDataInfo(int evt_number, unsigned int sensor_id, unsigned int charge)
 {
-  sns_data_t chargeData;
+  charge_data_t chargeData;
   chargeData.event_id = evt_number;
   chargeData.sensor_id = sensor_id;
   chargeData.charge = charge;
-  writeSnsData(&chargeData, chargeDataTable_, memtypeChargeData_, icharge_);
+  writeChargeData(&chargeData, chargeDataTable_, memtypeChargeData_, icharge_);
 
   icharge_++;
 }
