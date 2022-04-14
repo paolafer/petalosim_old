@@ -9,6 +9,7 @@
 #include "PetaloPhysics.h"
 #include "WavelengthShifting.h"
 #include "PositronAnnihilation.h"
+#include "PetaloPersistencyManager.h"
 
 #include <NESTProc.hh>
 #include <PetaloDetector.hh>
@@ -104,6 +105,10 @@ void PetaloPhysics::ConstructProcess()
 
   if (nest_) {
     PetaloDetector* petalo = new PetaloDetector();
+    G4double e_field = petalo->FitEF(0, 0, 0);
+    PetaloPersistencyManager* pm =
+      dynamic_cast<PetaloPersistencyManager*>(G4VPersistencyManager::GetPersistencyManager());
+    pm->SetElectricField(e_field);
     NEST::NESTcalc* petaloCalc = new NEST::NESTcalc(petalo);
     NEST::NESTProc* theNESTScintillationProcess =
       new NEST::NESTProc("S1", fElectromagnetic, petaloCalc, petalo);

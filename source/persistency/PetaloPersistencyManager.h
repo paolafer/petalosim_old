@@ -36,6 +36,8 @@ public:
   void InteractingEvent(G4bool);
   void StoreSteps(G4bool);
 
+  void SetElectricField(G4double);
+
   ///
   virtual G4bool Store(const G4Event *);
   virtual G4bool Store(const G4Run *);
@@ -68,6 +70,8 @@ private:
   G4bool store_evt_;       ///< Should we store the current event?
   G4bool store_steps_;     ///< Should we store the steps for the current event?
   G4bool interacting_evt_; ///< Has the current event interacted in ACTIVE?
+
+  G4double efield_; ///< Value of the electric field used in NEST
 
   G4String event_type_; ///< event type: bb0nu, bb2nu, background or not set
 
@@ -104,6 +108,10 @@ inline void PetaloPersistencyManager::StoreSteps(G4bool ss)
 inline void PetaloPersistencyManager::InteractingEvent(G4bool ie)
 {
   interacting_evt_ = ie;
+}
+inline void PetaloPersistencyManager::SetElectricField(G4double efield)
+{
+  efield_ = efield;
 }
 inline G4bool PetaloPersistencyManager::Store(const G4VPhysicalVolume *)
 {

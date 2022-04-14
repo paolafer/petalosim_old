@@ -44,7 +44,7 @@ REGISTER_CLASS(PetaloPersistencyManager, PersistencyManagerBase)
 
 PetaloPersistencyManager::PetaloPersistencyManager():
   PersistencyManagerBase(), msg_(0), ready_(false), store_evt_(true),
-  store_steps_(false), interacting_evt_(false), event_type_("other"),
+  store_steps_(false), interacting_evt_(false), efield_(0), event_type_("other"),
   saved_evts_(0), interacting_evts_(0), nevt_(0), start_id_(0), first_evt_(true),
   thr_charge_(0), tof_time_(50.*nanosecond), sns_only_(false),
   save_tot_charge_(true), h5writer_(0)
@@ -472,7 +472,9 @@ G4bool PetaloPersistencyManager::Store(const G4Run*)
   key = "tof_bin_size";
   h5writer_->WriteRunInfo(key, (std::to_string(tof_bin_size_/picosecond)+" ps").c_str());
   key = "interacting_events";
-  h5writer_->WriteRunInfo(key,  std::to_string(interacting_evts_).c_str());
+  h5writer_->WriteRunInfo(key, std::to_string(interacting_evts_).c_str());
+  key = "electric_field";
+  h5writer_->WriteRunInfo(key, (std::to_string(efield_)+" V/cm").c_str());
 
   SaveConfigurationInfo(init_macro_);
   for (unsigned long i=0; i<macros_.size(); i++) {
