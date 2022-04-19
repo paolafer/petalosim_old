@@ -11,6 +11,7 @@
 #include "SiPMpetVUV.h"
 #include "PetOpticalMaterialProperties.h"
 #include "ChargeSD.h"
+#include "JaszczakPhantom.h"
 
 #include "nexus/SpherePointSampler.h"
 #include "nexus/IonizationSD.h"
@@ -459,16 +460,20 @@ void FullRingInfinity::BuildSensors()
 
 void FullRingInfinity::BuildPhantom()
 {
-  phantom_diam_ = 6. * cm;
+  JaszczakPhantom phantom;
+  phantom.Construct();
+  G4LogicalVolume* phantom_logic = phantom.GetLogicalVolume();
+  new G4PVPlacement(0, G4ThreeVector(0, 0, 0), phantom_logic, "JASZCZAK", lab_logic_, false, 0, true);
+  // phantom_diam_ = 6. * cm;
 
-  G4Orb *phantom_solid = new G4Orb("PHANTOM", phantom_diam_ / 2.);
-  G4LogicalVolume *phantom_logic =
-      new G4LogicalVolume(phantom_solid, materials::PEEK(), "PHANTOM");
-  G4ThreeVector phantom_origin = specific_vertex_;
-  new G4PVPlacement(0, phantom_origin, phantom_logic, "PHANTOM", lab_logic_, false, 0, true);
+  // G4Orb *phantom_solid = new G4Orb("PHANTOM", phantom_diam_ / 2.);
+  // G4LogicalVolume *phantom_logic =
+  //     new G4LogicalVolume(phantom_solid, materials::PEEK(), "PHANTOM");
+  // G4ThreeVector phantom_origin = specific_vertex_;
+  // new G4PVPlacement(0, phantom_origin, phantom_logic, "PHANTOM", lab_logic_, false, 0, true);
 
-  spheric_gen_ =
-      new SpherePointSampler(0., phantom_diam_ / 2, phantom_origin);
+  // spheric_gen_ =
+  //     new SpherePointSampler(0., phantom_diam_ / 2, phantom_origin);
 }
 
 G4ThreeVector FullRingInfinity::GenerateVertex(const G4String &region) const
