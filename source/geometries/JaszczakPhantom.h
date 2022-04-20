@@ -12,6 +12,7 @@
 #include "nexus/GeometryBase.h"
 
 class G4Material;
+class G4GenericMessenger;
 
 namespace nexus
 {
@@ -30,6 +31,8 @@ class JaszczakPhantom: public GeometryBase
 
   void Construct();
 
+  G4ThreeVector GenerateVertex(const G4String &region) const;
+
  private:
 
   void BuildSpheres(unsigned long n, G4double r, G4double r_pos, G4double z_pos,
@@ -37,8 +40,14 @@ class JaszczakPhantom: public GeometryBase
   void BuildRods(unsigned long n, G4double r, G4double z_pos,
                  G4LogicalVolume* mother_logic, G4Material* mat) const;
 
+  G4GenericMessenger *msg_;
+
   SpherePointSampler* spheric_gen_;
   CylinderPointSampler2020* cyl_gen_;
+
+  G4int bckg_activity_;
+  G4int sphere_activity_;
+  G4int rod_activity_;
 
   G4double cylinder_inner_diam_;
   G4double cylinder_height_;

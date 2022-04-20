@@ -19,12 +19,16 @@
 #include <G4PVPlacement.hh>
 #include <G4RotationMatrix.hh>
 #include <G4VisAttributes.hh>
+#include <G4GenericMessenger.hh>
 
 using namespace nexus;
 
 REGISTER_CLASS(JaszczakPhantom, GeometryBase)
 
 JaszczakPhantom::JaszczakPhantom(): GeometryBase(),
+                                    bckg_activity_(1),
+                                    sphere_activity_(4),
+                                    rod_activity_(4),
                                     cylinder_inner_diam_(216*mm),
                                     cylinder_height_(186*mm),
                                     cylinder_thickn_(3.2*mm),
@@ -43,6 +47,12 @@ JaszczakPhantom::JaszczakPhantom(): GeometryBase(),
                                     rod6_d_(11.1*mm),
                                     rod_height_(88*mm)
 {
+  // Messenger
+  msg_ = new G4GenericMessenger(this, "/Geometry/Jaszczak/",
+                                "Control commands of geometry Jaszczak.");
+  msg_->DeclareProperty("bckg_activity",   bckg_activity_,   "Activity of the background of the phantom");
+  msg_->DeclareProperty("sphere_activity", sphere_activity_, "Activity of the spheres");
+  msg_->DeclareProperty("rod_activity",    rod_activity_,    "Activity of the rods");
 }
 
 
@@ -147,3 +157,14 @@ void JaszczakPhantom::BuildRods(unsigned long n, G4double r, G4double z_pos,
       }
     }
   }
+
+
+G4ThreeVector JaszczakPhantom::GenerateVertex(const G4String &region) const
+{
+
+  G4ThreeVector vertex(0., 0., 0.);
+
+  //vertex = spheric_gen_->GenerateVertex("VOLUME");
+
+  return vertex;
+}
