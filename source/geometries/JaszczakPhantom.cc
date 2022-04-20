@@ -53,26 +53,27 @@ JaszczakPhantom::~JaszczakPhantom()
 
 void JaszczakPhantom::Construct()
 {
-  G4String cyl_name = "CYLINDER";
-  G4Tubs* cylinder_solid =
+  auto cyl_name = "CYLINDER";
+  auto cylinder_solid =
     new G4Tubs(cyl_name, 0, (cylinder_inner_diam_+2*cylinder_thickn_)/2,
                (cylinder_height_+2*cylinder_thickn_)/2., 0, twopi);
 
   G4Material* aluminum = G4NistManager::Instance()->FindOrBuildMaterial("G4_Al");
-  G4LogicalVolume* cylinder_logic =
+  auto cylinder_logic =
     new G4LogicalVolume(cylinder_solid, aluminum, cyl_name);
 
   this->SetLogicalVolume(cylinder_logic);
 
 
-  G4String water_name = "WATER_BCKG";
-  G4Tubs* water_solid =
+  auto water_name = "WATER_BCKG";
+  auto water_solid =
     new G4Tubs(water_name, 0, cylinder_inner_diam_/2, cylinder_height_/2., 0, twopi);
 
   G4Material* water = G4NistManager::Instance()->FindOrBuildMaterial("G4_water");
-  G4LogicalVolume* water_logic =
+  auto water_logic =
     new G4LogicalVolume(water_solid, water, water_name);
-  new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), water_logic, water_name, cylinder_logic, false, 0, true);
+  new G4PVPlacement(0, G4ThreeVector(0., 0., 0.),
+                    water_logic, water_name, cylinder_logic, false, 0, true);
 
   // Spheres
   std::vector<G4double> sphere_radii =
