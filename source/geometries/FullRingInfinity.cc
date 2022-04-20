@@ -96,7 +96,7 @@ FullRingInfinity::FullRingInfinity() :
   msg_->DeclareProperty("sipm_rows", n_sipm_rows_, "Number of SiPM rows");
   msg_->DeclareProperty("instrumented_faces", instr_faces_, "Number of instrumented faces");
   msg_->DeclareProperty("charge_detector", charge_det_, "True if charge is detected");
-  msg_->DeclareProperty("phantom", phantom_, "True if spherical physical phantom is used");
+  msg_->DeclareProperty("phantom", phantom_, "True if Jaszczak phantom is used");
 
   msg_->DeclarePropertyWithUnit("specific_vertex", "mm",  specific_vertex_,
                                 "Set generation vertex.");
@@ -460,9 +460,9 @@ void FullRingInfinity::BuildSensors()
 
 void FullRingInfinity::BuildPhantom()
 {
-  JaszczakPhantom phantom;
-  phantom.Construct();
-  G4LogicalVolume* phantom_logic = phantom.GetLogicalVolume();
+  jas_phantom_ = new JaszczakPhantom();
+  jas_phantom_->Construct();
+  G4LogicalVolume* phantom_logic = jas_phantom_->GetLogicalVolume();
   new G4PVPlacement(0, G4ThreeVector(0, 0, 0), phantom_logic, "JASZCZAK", lab_logic_, false, 0, true);
   // phantom_diam_ = 6. * cm;
 
@@ -489,9 +489,9 @@ G4ThreeVector FullRingInfinity::GenerateVertex(const G4String &region) const
   {
     vertex = specific_vertex_;
   }
-  else if (region == "PHANTOM")
+  else if (region == "JPHANTOM")
   {
-    vertex = spheric_gen_->GenerateVertex("VOLUME");
+    vertex = jas_phantom_->GenerateVertex("JPHANTOM");
   }
   else if (region == "CUSTOM")
   {

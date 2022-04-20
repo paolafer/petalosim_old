@@ -18,6 +18,7 @@ class G4LogicalVolume;
 class G4Material;
 
 class SiPMpetVUV;
+class JaszczakPhantom;
 
 namespace nexus
 {
@@ -101,6 +102,7 @@ private:
   G4double sens_z_min_, sens_z_max_;
 
   G4Material* LXe_;
+  JaszczakPhantom* jas_phantom_;
 };
 
 #endif
