@@ -77,19 +77,19 @@ void JaszczakPhantom::Construct()
   // Spheres
   std::vector<G4double> sphere_radii =
     {sphere1_d_/2, sphere2_d_/2, sphere3_d_/2, sphere4_d_/2, sphere5_d_/2, sphere6_d_/2};
-  auto sphere_pos_radius = cylinder_inner_diam_/4.;
-  auto z = - cylinder_height_/2. + sphere_height_;
+  auto radius_pos = cylinder_inner_diam_/4.;
+  auto z_pos      = - cylinder_height_/2. + sphere_height_;
 
   for (unsigned long i=0; i<sphere_radii.size(); i++) {
-    BuildSpheres(i, sphere_radii[i], sphere_pos_radius, z, water_logic, water);
+    BuildSpheres(i, sphere_radii[i], radius_pos, z_pos, water_logic, water);
   }
 
   // Rods
   std::vector<G4double> rod_radii =
     {rod1_d_/2, rod2_d_/2, rod3_d_/2, rod4_d_/2, rod5_d_/2, rod6_d_/2};
-  z = - cylinder_height_/2. + rod_height_/2;
+  z_pos = - cylinder_height_/2. + rod_height_/2;
   for (unsigned long i=0; i<rod_radii.size(); i++) {
-    BuildRods(i, rod_radii[i], z, water_logic, water);
+    BuildRods(i, rod_radii[i], z_pos, water_logic, water);
   }
 
 }
@@ -98,13 +98,14 @@ void JaszczakPhantom::Construct()
 void JaszczakPhantom::BuildSpheres(unsigned long n, G4double r, G4double r_pos, G4double z_pos,
                                    G4LogicalVolume* mother_logic, G4Material* mat) const
 {
-  G4String sphere_name = "SPHERE" + std::to_string(n);
+  auto sphere_name = "SPHERE" + std::to_string(n);
   auto sphere_solid = new G4Orb(sphere_name, r);
   auto sphere_logic = new G4LogicalVolume(sphere_solid, mat, sphere_name);
   auto angle = n * 60 * deg;
-  auto x = r_pos * cos(angle);
-  auto y = r_pos * sin(angle);
-  new G4PVPlacement(0, G4ThreeVector(x, y, z_pos), sphere_logic, sphere_name, mother_logic, false, 0, true);
+  auto x_pos = r_pos * cos(angle);
+  auto y_pos = r_pos * sin(angle);
+  new G4PVPlacement(0, G4ThreeVector(x_pos, y_pos, z_pos), sphere_logic,
+                    sphere_name, mother_logic, false, 0, true);
 }
 
 
@@ -128,17 +129,16 @@ void JaszczakPhantom::BuildRods(unsigned long n, G4double r, G4double z_pos,
     for (bool did_b=true ; did_b; a+=1) {
       did_b = false;
       for (auto b = 0; /*break when touches the cylinder*/; b+=1, did_b = true) {
-        auto x = (a*Ax + b*Bx) * diam + dx;
-        auto y = (a*Ay + b*By) * diam + dy;
+        auto x_pos = (a*Ax + b*Bx) * diam + dx;
+        auto y_pos = (a*Ay + b*By) * diam + dy;
         auto margin = 0.1 * mm;
-        if (sqrt(x*x + y*y) + r + margin >= cylinder_inner_diam_/2.) { break; }
-        auto label = std::string("ROD") + std::to_string(n);
+        if (sqrt(x_pos*x_pos + y_pos*y_pos) + r + margin >= cylinder_inner_diam_/2.) { break; }
+        auto label = "ROD" + std::to_string(n);
         auto rod_solid = new G4Tubs(label, 0, r, rod_height_/2, 0, twopi);
         auto rod_logic = new G4LogicalVolume(rod_solid, mat, label);
-        G4ThreeVector pos = G4ThreeVector(x, y, z_pos);
+        G4ThreeVector pos = G4ThreeVector(x_pos, y_pos, z_pos);
         G4ThreeVector newpos = pos.rotateZ(n*pi/3);
-        new G4PVPlacement(0, newpos,
-                          rod_logic, label, mother_logic, false, 0, true);
+        new G4PVPlacement(0, newpos, rod_logic, label, mother_logic, false, 0, true);
 
         G4VisAttributes col = nexus::Blue();
         col.SetForceSolid(true);
