@@ -9,6 +9,7 @@
 #include "JaszczakPhantom.h"
 
 #include "nexus/FactoryBase.h"
+#include "nexus/Visibilities.h"
 
 #include <G4Tubs.hh>
 #include <G4Orb.hh>
@@ -17,6 +18,7 @@
 #include <G4NistManager.hh>
 #include <G4PVPlacement.hh>
 #include <G4RotationMatrix.hh>
+#include <G4VisAttributes.hh>
 
 using namespace nexus;
 
@@ -91,25 +93,19 @@ void JaszczakPhantom::Construct()
   // Rods
   std::vector<G4double> rod_radii =
     {rod1_d_/2, rod2_d_/2, rod3_d_/2, rod4_d_/2, rod5_d_/2, rod6_d_/2};
+  z = - cylinder_height_/2. + rod_height_/2;
   for (unsigned long i=0; i<rod_radii.size(); i++) {
-    BuildRods(i, rod_radii[i], water_logic, water);
+    BuildRods(i, rod_radii[i], z, water_logic, water);
   }
 
 }
 
 
 
-
-void JaszczakPhantom::BuildRods(unsigned long n, G4double r,
+void JaszczakPhantom::BuildRods(unsigned long n, G4double r, G4double z_pos,
                                 G4LogicalVolume* mother_logic, G4Material* mat) const
   {
-    // Rods
-    auto d = 2 * r;
-    auto z = - cylinder_height_/2. + rod_height_/2;
-    //G4RotationMatrix rot_z{{0,0,1}, n*pi/3};
-    G4RotationMatrix rot_z;
-    rot_z.rotateZ(n*pi/3);
-
+    auto diam = 2 * r;
 
     // Sector displacement from centre, to accommodate gap between sectors
     auto gap =  14.4 * mm;
@@ -124,16 +120,22 @@ void JaszczakPhantom::BuildRods(unsigned long n, G4double r,
     auto a = 0;
     for (bool did_b=true ; did_b; a+=1) {
       did_b = false;
-      for (auto b = 0; /*break in body*/; b+=1, did_b = true) {
-        auto x = (a*Ax + b*Bx) * d + dx;
-        auto y = (a*Ay + b*By) * d + dy;
+      for (auto b = 0; /*break when touches the cylinder*/; b+=1, did_b = true) {
+        auto x = (a*Ax + b*Bx) * diam + dx;
+        auto y = (a*Ay + b*By) * diam + dy;
         auto margin = 0.1 * mm;
         if (sqrt(x*x + y*y) + r + margin >= cylinder_inner_diam_/2.) { break; }
         auto label = std::string("ROD") + std::to_string(n);
         auto rod_solid = new G4Tubs(label, 0, r, rod_height_/2, 0, twopi);
         auto rod_logic = new G4LogicalVolume(rod_solid, mat, label);
-        new G4PVPlacement(G4Transform3D(rot_z, G4ThreeVector(x, y, z)),
+        G4ThreeVector pos = G4ThreeVector(x, y, z_pos);
+        G4ThreeVector newpos = pos.rotateZ(n*pi/3);
+        new G4PVPlacement(0, newpos,
                           rod_logic, label, mother_logic, false, 0, true);
+
+        G4VisAttributes col = nexus::Blue();
+        col.SetForceSolid(true);
+        rod_logic->SetVisAttributes(col);
       }
     }
   }

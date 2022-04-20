@@ -32,7 +32,8 @@ class JaszczakPhantom: public GeometryBase
 
  private:
 
-  void BuildRods(unsigned long n, G4double r, G4LogicalVolume* mother_logic, G4Material* mat) const;
+  void BuildRods(unsigned long n, G4double r, G4double z_pos,
+                 G4LogicalVolume* mother_logic, G4Material* mat) const;
 
   SpherePointSampler* spheric_gen_;
   CylinderPointSampler2020* cyl_gen_;
