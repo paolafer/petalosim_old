@@ -32,7 +32,7 @@ class JaszczakPhantom: public GeometryBase
 
   void Construct();
 
-  G4ThreeVector GenerateVertex(const G4String &region) const;
+  G4ThreeVector GenerateVertex(const G4String &/*region*/) const;
 
  private:
 

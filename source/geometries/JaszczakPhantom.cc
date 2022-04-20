@@ -178,7 +178,7 @@ void JaszczakPhantom::BuildRods(unsigned long n, G4double r, G4double z_pos,
   }
 
 
-G4ThreeVector JaszczakPhantom::GenerateVertex(const G4String &region) const
+G4ThreeVector JaszczakPhantom::GenerateVertex(const G4String &/*region*/) const
 {
   G4ThreeVector vertex(0, 0, 0);
   G4VPhysicalVolume* VertexVolume;
