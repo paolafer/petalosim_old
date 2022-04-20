@@ -13,6 +13,7 @@
 
 class G4Material;
 class G4GenericMessenger;
+class G4Navigator;
 
 namespace nexus
 {
@@ -41,13 +42,14 @@ class JaszczakPhantom: public GeometryBase
                  G4LogicalVolume* mother_logic, G4Material* mat) const;
 
   G4GenericMessenger *msg_;
+  G4Navigator* geom_navigator_;
 
   SpherePointSampler* spheric_gen_;
   CylinderPointSampler2020* cyl_gen_;
 
-  G4int bckg_activity_;
-  G4int sphere_activity_;
-  G4int rod_activity_;
+  G4double bckg_activity_;
+  G4double sphere_activity_;
+  G4double rod_activity_;
 
   G4double cylinder_inner_diam_;
   G4double cylinder_height_;

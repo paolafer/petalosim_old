@@ -10,6 +10,7 @@
 
 #include "nexus/FactoryBase.h"
 #include "nexus/Visibilities.h"
+#include "nexus/CylinderPointSampler2020.h"
 
 #include <G4Tubs.hh>
 #include <G4Orb.hh>
@@ -20,6 +21,8 @@
 #include <G4RotationMatrix.hh>
 #include <G4VisAttributes.hh>
 #include <G4GenericMessenger.hh>
+#include <G4TransportationManager.hh>
+#include <G4Navigator.hh>
 
 using namespace nexus;
 
@@ -53,6 +56,10 @@ JaszczakPhantom::JaszczakPhantom(): GeometryBase(),
   msg_->DeclareProperty("bckg_activity",   bckg_activity_,   "Activity of the background of the phantom");
   msg_->DeclareProperty("sphere_activity", sphere_activity_, "Activity of the spheres");
   msg_->DeclareProperty("rod_activity",    rod_activity_,    "Activity of the rods");
+
+  /// Initializing the geometry navigator (used in vertex generation)
+  geom_navigator_ =
+    G4TransportationManager::GetTransportationManager()->GetNavigatorForTracking();
 }
 
 
@@ -79,11 +86,14 @@ void JaszczakPhantom::Construct()
   auto water_solid =
     new G4Tubs(water_name, 0, cylinder_inner_diam_/2, cylinder_height_/2., 0, twopi);
 
-  G4Material* water = G4NistManager::Instance()->FindOrBuildMaterial("G4_water");
+  G4Material* water = G4NistManager::Instance()->FindOrBuildMaterial("G4_WATER");
   auto water_logic =
     new G4LogicalVolume(water_solid, water, water_name);
-  new G4PVPlacement(0, G4ThreeVector(0., 0., 0.),
-                    water_logic, water_name, cylinder_logic, false, 0, true);
+  G4VPhysicalVolume* water_phys =
+    new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), water_logic, water_name, cylinder_logic,
+                      false, 0, true);
+
+  cyl_gen_ = new CylinderPointSampler2020(water_phys);
 
   // Spheres
   std::vector<G4double> sphere_radii =
@@ -102,6 +112,15 @@ void JaszczakPhantom::Construct()
   for (unsigned long i=0; i<rod_radii.size(); i++) {
     BuildRods(i, rod_radii[i], z_pos, water_logic, water);
   }
+
+  // Relative actvities
+  auto max_activity = std::max(sphere_activity_, std::max(bckg_activity_, rod_activity_));
+  bckg_activity_   /= max_activity;
+  sphere_activity_ /= max_activity;
+  rod_activity_    /= max_activity;
+
+  G4cout << "*** Relative activities (background, spheres, rods) ***" << G4endl;
+  G4cout << bckg_activity_ << ", " << sphere_activity_  << ", " << rod_activity_ << G4endl;
 
 }
 
@@ -161,10 +180,21 @@ void JaszczakPhantom::BuildRods(unsigned long n, G4double r, G4double z_pos,
 
 G4ThreeVector JaszczakPhantom::GenerateVertex(const G4String &region) const
 {
+  G4ThreeVector vertex(0, 0, 0);
+  G4VPhysicalVolume* VertexVolume;
 
-  G4ThreeVector vertex(0., 0., 0.);
+  while (true) {
+    vertex = cyl_gen_->GenerateVertex("VOLUME");
+    VertexVolume = geom_navigator_->LocateGlobalPointAndSetup(vertex, 0, false);
+    G4String vol_name = VertexVolume->GetName();
 
-  //vertex = spheric_gen_->GenerateVertex("VOLUME");
+    if (G4StrUtil::starts_with(vol_name, "WATER_BCKG")) {
+      if (((float)std::rand() / (float)RAND_MAX) < bckg_activity_) return vertex;
+    } else if (G4StrUtil::starts_with(vol_name, "SPHERE")) {
+      if (((float)std::rand() / (float)RAND_MAX) < sphere_activity_) return vertex;
+    } else if (G4StrUtil::starts_with(vol_name, "ROD")) {
+      if (((float)std::rand() / (float)RAND_MAX) < rod_activity_) return vertex;
+    }
+  }
 
-  return vertex;
 }
