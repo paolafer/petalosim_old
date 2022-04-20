@@ -81,13 +81,7 @@ void JaszczakPhantom::Construct()
   auto z = - cylinder_height_/2. + sphere_height_;
 
   for (unsigned long i=0; i<sphere_radii.size(); i++) {
-    G4String sphere_name = "SPHERE" + std::to_string(i+1);
-    G4Orb* sphere_solid = new G4Orb(sphere_name, sphere_radii[i]);
-    G4LogicalVolume* sphere_logic = new G4LogicalVolume(sphere_solid, water, sphere_name);
-    G4double angle = i * 60 * deg;
-    auto x = sphere_pos_radius * cos(angle);
-    auto y = sphere_pos_radius * sin(angle);
-    new G4PVPlacement(0, G4ThreeVector(x, y, z), sphere_logic, sphere_name, water_logic, false, 0, true);
+    BuildSpheres(i, sphere_radii[i], sphere_pos_radius, z, water_logic, water);
   }
 
   // Rods
@@ -98,6 +92,19 @@ void JaszczakPhantom::Construct()
     BuildRods(i, rod_radii[i], z, water_logic, water);
   }
 
+}
+
+
+void JaszczakPhantom::BuildSpheres(unsigned long n, G4double r, G4double r_pos, G4double z_pos,
+                                   G4LogicalVolume* mother_logic, G4Material* mat) const
+{
+  G4String sphere_name = "SPHERE" + std::to_string(n);
+  auto sphere_solid = new G4Orb(sphere_name, r);
+  auto sphere_logic = new G4LogicalVolume(sphere_solid, mat, sphere_name);
+  auto angle = n * 60 * deg;
+  auto x = r_pos * cos(angle);
+  auto y = r_pos * sin(angle);
+  new G4PVPlacement(0, G4ThreeVector(x, y, z_pos), sphere_logic, sphere_name, mother_logic, false, 0, true);
 }
 
 

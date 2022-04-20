@@ -32,6 +32,8 @@ class JaszczakPhantom: public GeometryBase
 
  private:
 
+  void BuildSpheres(unsigned long n, G4double r, G4double r_pos, G4double z_pos,
+                 G4LogicalVolume* mother_logic, G4Material* mat) const;
   void BuildRods(unsigned long n, G4double r, G4double z_pos,
                  G4LogicalVolume* mother_logic, G4Material* mat) const;
 
