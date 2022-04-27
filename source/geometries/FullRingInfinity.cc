@@ -334,7 +334,7 @@ void FullRingInfinity::BuildSensors()
   // Add simple detector for charge
   G4double chdet_thickn = 1.*mm;
   G4Box* chdet_solid = new G4Box("CHARGE_DET", sipm_dim_.x()/2.,
-                                 sipm_dim_.y()/2., chdet_thickn/2);
+                                 axial_length_/2., chdet_thickn/2);
   G4LogicalVolume* chdet_logic =
     new G4LogicalVolume(chdet_solid, LXe_, "CHARGE_DET");
 
@@ -347,6 +347,10 @@ void FullRingInfinity::BuildSensors()
     G4SDManager::GetSDMpointer()->AddNewDetector(chargesd);
     chdet_logic->SetSensitiveDetector(chargesd);
   }
+
+  G4VisAttributes blue_col = nexus::Yellow();
+  blue_col.SetForceSolid(true);
+  chdet_logic->SetVisAttributes(blue_col);
 
   //G4double sipm_pitch = sipm_dim.x() + 1. * mm;
 
@@ -412,6 +416,30 @@ void FullRingInfinity::BuildSensors()
     copy_no = 999;
   }
 
+
+  // Charge detectors
+  G4double chdet_z_pos = 0.;
+  G4ThreeVector chdet_position(0., chdet_radius, chdet_z_pos);
+  G4int chdet_copy_no = 0;
+  G4String chdet_vol_name = "CHARGE_DET_" + std::to_string(chdet_copy_no);
+  new G4PVPlacement(G4Transform3D(rot, chdet_position), chdet_logic,
+                    chdet_vol_name, active_logic_, false, copy_no, false);
+
+  G4RotationMatrix chdet_rot;
+  chdet_rot.rotateX(-pi / 2.);
+  for (G4int i = 1; i < n_sipm_ext; ++i)
+    {
+      G4double angle = i * step;
+      chdet_rot.rotateZ(step);
+      chdet_position.setX(-chdet_radius * sin(angle));
+      chdet_position.setY(chdet_radius * cos(angle));
+      chdet_copy_no = chdet_copy_no + 1;
+      chdet_vol_name = "CHARGE_DET_" + std::to_string(chdet_copy_no);
+      new G4PVPlacement(G4Transform3D(chdet_rot, chdet_position), chdet_logic,
+                        chdet_vol_name, active_logic_, false, chdet_copy_no, false);
+    }
+
+
   for (G4int j = 0; j < n_sipm_rows_; j++)
   {
     // The first must be positioned outside the loop
@@ -419,16 +447,17 @@ void FullRingInfinity::BuildSensors()
       rot.rotateZ(step);
     G4double z_pos = -axial_length_ / 2. + (j + 1. / 2.) * sipm_pitch_;
     G4ThreeVector position(0., radius, z_pos);
-    G4ThreeVector chdet_position(0., chdet_radius, z_pos);
+    //    G4ThreeVector chdet_position(0., chdet_radius, z_pos);
     copy_no = copy_no + 1;
     G4String vol_name       = "SIPM_" + std::to_string(copy_no);
-    G4String chdet_vol_name = "CHARGE_DET_" + std::to_string(copy_no);
+    //   G4String chdet_vol_name = "CHARGE_DET_" + std::to_string(copy_no);
     new G4PVPlacement(G4Transform3D(rot, position), sipm_logic,
                       vol_name, active_logic_, false, copy_no, false);
-    if (charge_det_) {
-      new G4PVPlacement(G4Transform3D(rot, chdet_position), chdet_logic,
-                        chdet_vol_name, active_logic_, false, copy_no, false);
-    }
+    // if (charge_det_) {
+    //   new G4PVPlacement(G4Transform3D(rot, chdet_position), chdet_logic,
+    //                     chdet_vol_name, active_logic_, false, copy_no, false);
+    // }
+
     // G4cout << "INSERT INTO ChannelMatrixP7R410Z1950mm (MinRun, MaxRun, SensorID, PhiNumber, ZNumber) VALUES (0, 100000, "
     //	     << copy_no << ", 0, " << j << ");" << G4endl;
     //G4cout << "INSERT INTO ChannelPositionP7R410Z1950mm (MinRun, MaxRun, SensorID, X, Y, Z) VALUES (0, 100000, "
@@ -439,17 +468,18 @@ void FullRingInfinity::BuildSensors()
       rot.rotateZ(step);
       position.setX(-radius * sin(angle));
       position.setY(radius * cos(angle));
-      chdet_position.setX(-chdet_radius * sin(angle));
-      chdet_position.setY(chdet_radius * cos(angle));
+      //   chdet_position.setX(-chdet_radius * sin(angle));
+      //    chdet_position.setY(chdet_radius * cos(angle));
       copy_no = copy_no + 1;
       vol_name       = "SIPM_" + std::to_string(copy_no);
-      chdet_vol_name = "CHARGE_DET_" + std::to_string(copy_no);
+      //chdet_vol_name = "CHARGE_DET_" + std::to_string(copy_no);
       new G4PVPlacement(G4Transform3D(rot, position), sipm_logic,
                         vol_name, active_logic_, false, copy_no, false);
-      if (charge_det_) {
-        new G4PVPlacement(G4Transform3D(rot, chdet_position), chdet_logic,
-                          chdet_vol_name, active_logic_, false, copy_no, false);
-      }
+      // if (charge_det_) {
+      //   new G4PVPlacement(G4Transform3D(rot, chdet_position), chdet_logic,
+      //                     chdet_vol_name, active_logic_, false, copy_no, false);
+      // }
+
       //	G4cout << "INSERT INTO ChannelMatrixP7R410Z1950mm (MinRun, MaxRun, SensorID, PhiNumber, ZNumber) VALUES (0, 100000, "
       //       << copy_no << ", " << i-1 << ", " << j << ");" << G4endl;
       //	G4cout << "INSERT INTO ChannelPositionP7R410Z1950mm (MinRun, MaxRun, SensorID, X, Y, Z) VALUES (0, 100000, "
