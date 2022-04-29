@@ -220,11 +220,12 @@ void HDF5Writer::WriteStep(int evt_number,
   istep_++;
 }
 
-void HDF5Writer::WriteChargeDataInfo(int evt_number, unsigned int sensor_id, unsigned int charge)
+void HDF5Writer::WriteChargeDataInfo(int evt_number, unsigned int sensor_id, unsigned int time_bin, unsigned int charge)
 {
   charge_data_t chargeData;
   chargeData.event_id = evt_number;
   chargeData.sensor_id = sensor_id;
+  chargeData.time_bin = time_bin;
   chargeData.charge = charge;
   writeChargeData(&chargeData, chargeDataTable_, memtypeChargeData_, icharge_);
 

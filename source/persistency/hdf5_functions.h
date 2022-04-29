@@ -99,6 +99,7 @@ typedef struct{
   typedef struct{
     int32_t event_id;
     unsigned int sensor_id;
+    unsigned int time_bin;
     unsigned int charge;
   } charge_data_t;
 

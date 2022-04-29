@@ -43,7 +43,7 @@ public:
                  const char *proc_name,
                  float initial_x, float initial_y, float initial_z,
                  float final_x, float final_y, float final_z);
-  void WriteChargeDataInfo(int evt_number, unsigned int sensor_id, unsigned int charge);
+  void WriteChargeDataInfo(int evt_number, unsigned int sensor_id, unsigned int time_bin, unsigned int charge);
 
 private:
   size_t file_; ///< HDF5 file
