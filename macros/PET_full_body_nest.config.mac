@@ -2,12 +2,14 @@
 ### GEOMETRY
 
 /Geometry/FullRingInfinity/depth 3. cm
-/Geometry/FullRingInfinity/pitch 7. mm
+/Geometry/FullRingInfinity/sipm_pitch 7. mm
 /Geometry/FullRingInfinity/inner_radius 380. mm
 /Geometry/FullRingInfinity/sipm_rows 278
 /Geometry/FullRingInfinity/instrumented_faces 1
 /Geometry/FullRingInfinity/specific_vertex 0. 0. 0. cm
+
 /Geometry/FullRingInfinity/charge_detector true
+/Geometry/FullRingInfinity/wire_pitch 4. mm
 
 /Geometry/SiPMpet/efficiency 0.3
 /Geometry/SiPMpet/visibility true

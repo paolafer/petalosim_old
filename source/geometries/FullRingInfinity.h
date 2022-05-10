@@ -44,6 +44,7 @@ private:
   void BuildCryostat();
   void BuildQuadSensors();
   void BuildSensors();
+  void BuildWires();
   void BuildPhantom();
   void BuildPointfile(G4String pointFile);
   G4int binarySearchPt(G4int low, G4int high, G4double rnd) const;
@@ -64,6 +65,7 @@ private:
   G4int n_sipm_rows_;
   G4int instr_faces_; ///< number of instrumented faces
   G4bool charge_det_;
+  G4double wire_pitch_;
   G4double kapton_thickn_;
   G4double lxe_depth_;
 

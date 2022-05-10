@@ -47,6 +47,7 @@ FullRingInfinity::FullRingInfinity() :
   n_sipm_rows_(16),
   instr_faces_(2),
   charge_det_(false),
+  wire_pitch_(4. * mm),
   kapton_thickn_(0.3 * mm),
   lxe_depth_(5. * cm),
   offset_(0.1 * mm),
@@ -82,7 +83,7 @@ FullRingInfinity::FullRingInfinity() :
   depth_cmd.SetRange("depth>0.");
 
   G4GenericMessenger::Command &pitch_cmd =
-      msg_->DeclareProperty("pitch", sipm_pitch_, "Pitch of SiPMs");
+      msg_->DeclareProperty("sipm_pitch", sipm_pitch_, "Pitch of SiPMs");
   pitch_cmd.SetUnitCategory("Length");
   pitch_cmd.SetParameterName("pitch", false);
   pitch_cmd.SetRange("pitch>0.");
@@ -96,13 +97,21 @@ FullRingInfinity::FullRingInfinity() :
   msg_->DeclareProperty("sipm_rows", n_sipm_rows_, "Number of SiPM rows");
   msg_->DeclareProperty("instrumented_faces", instr_faces_, "Number of instrumented faces");
   msg_->DeclareProperty("charge_detector", charge_det_, "True if charge is detected");
+
+  G4GenericMessenger::Command& wire_pitch_cmd =
+      msg_->DeclareProperty("wire_pitch", wire_pitch_, "Pitch of wires");
+  wire_pitch_cmd.SetUnitCategory("Length");
+  wire_pitch_cmd.SetParameterName("wire_pitch", false);
+  wire_pitch_cmd.SetRange("wire_pitch>0.");
+
   msg_->DeclareProperty("phantom", phantom_, "True if Jaszczak phantom is used");
 
   msg_->DeclarePropertyWithUnit("specific_vertex", "mm",  specific_vertex_,
                                 "Set generation vertex.");
 
   // Read in the point distribution.
-  msg_->DeclareMethod("pointFile", &FullRingInfinity::BuildPointfile, "Location of file containing distribution of event generation points.");
+  msg_->DeclareMethod("pointFile", &FullRingInfinity::BuildPointfile,
+    "Location of file containing distribution of event generation points.");
 
   G4GenericMessenger::Command &table_cmd =
       msg_->DeclareProperty("sensitivity_binning", sensitivity_binning_,
@@ -188,6 +197,9 @@ void FullRingInfinity::Construct()
 
   BuildCryostat();
   BuildSensors();
+
+  if (charge_det_)
+    BuildWires();
 
   if (phantom_)
     BuildPhantom();
@@ -330,28 +342,6 @@ void FullRingInfinity::BuildCryostat()
 void FullRingInfinity::BuildSensors()
 {
   G4LogicalVolume* sipm_logic = sipm_->GetLogicalVolume();
-
-  // Add simple detector for charge
-  G4double chdet_thickn = 1.*mm;
-  G4Box* chdet_solid = new G4Box("CHARGE_DET", sipm_dim_.x()/2.,
-                                 axial_length_/2., chdet_thickn/2);
-  G4LogicalVolume* chdet_logic =
-    new G4LogicalVolume(chdet_solid, LXe_, "CHARGE_DET");
-
-  G4String sdname = "/WIRE/ChargeDet";
-  G4SDManager* sdmgr = G4SDManager::GetSDMpointer();
-  if (!sdmgr->FindSensitiveDetector(sdname, false))
-  {
-    ChargeSD* chargesd = new ChargeSD(sdname);
-    chargesd->SetTimeBinning(1.*microsecond);
-    G4SDManager::GetSDMpointer()->AddNewDetector(chargesd);
-    chdet_logic->SetSensitiveDetector(chargesd);
-  }
-
-  G4VisAttributes blue_col = nexus::Yellow();
-  blue_col.SetForceSolid(true);
-  chdet_logic->SetVisAttributes(blue_col);
-
   //G4double sipm_pitch = sipm_dim.x() + 1. * mm;
 
   G4int n_sipm_int = 2 * pi * inner_radius_ / sipm_pitch_;
@@ -403,7 +393,7 @@ void FullRingInfinity::BuildSensors()
   G4cout << "Number of sipms in external face: " << n_sipm_ext * n_sipm_rows_ << G4endl;
   //radius = external_radius_ - sipm_dim_.z() / 2. - offset_;
   radius = inner_radius_ + lxe_depth_ + sipm_dim_.z()/2.;
-  G4double chdet_radius = inner_radius_ + lxe_depth_ - chdet_thickn / 2.;
+
 
   rot.rotateZ(step);
   rot.rotateX(pi);
@@ -416,30 +406,6 @@ void FullRingInfinity::BuildSensors()
     copy_no = 999;
   }
 
-
-  // Charge detectors
-  G4double chdet_z_pos = 0.;
-  G4ThreeVector chdet_position(0., chdet_radius, chdet_z_pos);
-  G4int chdet_copy_no = 0;
-  G4String chdet_vol_name = "CHARGE_DET_" + std::to_string(chdet_copy_no);
-  new G4PVPlacement(G4Transform3D(rot, chdet_position), chdet_logic,
-                    chdet_vol_name, active_logic_, false, copy_no, false);
-
-  G4RotationMatrix chdet_rot;
-  chdet_rot.rotateX(-pi / 2.);
-  for (G4int i = 1; i < n_sipm_ext; ++i)
-    {
-      G4double angle = i * step;
-      chdet_rot.rotateZ(step);
-      chdet_position.setX(-chdet_radius * sin(angle));
-      chdet_position.setY(chdet_radius * cos(angle));
-      chdet_copy_no = chdet_copy_no + 1;
-      chdet_vol_name = "CHARGE_DET_" + std::to_string(chdet_copy_no);
-      new G4PVPlacement(G4Transform3D(chdet_rot, chdet_position), chdet_logic,
-                        chdet_vol_name, active_logic_, false, chdet_copy_no, false);
-    }
-
-
   for (G4int j = 0; j < n_sipm_rows_; j++)
   {
     // The first must be positioned outside the loop
@@ -447,16 +413,10 @@ void FullRingInfinity::BuildSensors()
       rot.rotateZ(step);
     G4double z_pos = -axial_length_ / 2. + (j + 1. / 2.) * sipm_pitch_;
     G4ThreeVector position(0., radius, z_pos);
-    //    G4ThreeVector chdet_position(0., chdet_radius, z_pos);
     copy_no = copy_no + 1;
     G4String vol_name       = "SIPM_" + std::to_string(copy_no);
-    //   G4String chdet_vol_name = "CHARGE_DET_" + std::to_string(copy_no);
     new G4PVPlacement(G4Transform3D(rot, position), sipm_logic,
                       vol_name, active_logic_, false, copy_no, false);
-    // if (charge_det_) {
-    //   new G4PVPlacement(G4Transform3D(rot, chdet_position), chdet_logic,
-    //                     chdet_vol_name, active_logic_, false, copy_no, false);
-    // }
 
     // G4cout << "INSERT INTO ChannelMatrixP7R410Z1950mm (MinRun, MaxRun, SensorID, PhiNumber, ZNumber) VALUES (0, 100000, "
     //	     << copy_no << ", 0, " << j << ");" << G4endl;
@@ -468,17 +428,10 @@ void FullRingInfinity::BuildSensors()
       rot.rotateZ(step);
       position.setX(-radius * sin(angle));
       position.setY(radius * cos(angle));
-      //   chdet_position.setX(-chdet_radius * sin(angle));
-      //    chdet_position.setY(chdet_radius * cos(angle));
       copy_no = copy_no + 1;
       vol_name       = "SIPM_" + std::to_string(copy_no);
-      //chdet_vol_name = "CHARGE_DET_" + std::to_string(copy_no);
       new G4PVPlacement(G4Transform3D(rot, position), sipm_logic,
                         vol_name, active_logic_, false, copy_no, false);
-      // if (charge_det_) {
-      //   new G4PVPlacement(G4Transform3D(rot, chdet_position), chdet_logic,
-      //                     chdet_vol_name, active_logic_, false, copy_no, false);
-      // }
 
       //	G4cout << "INSERT INTO ChannelMatrixP7R410Z1950mm (MinRun, MaxRun, SensorID, PhiNumber, ZNumber) VALUES (0, 100000, "
       //       << copy_no << ", " << i-1 << ", " << j << ");" << G4endl;
@@ -487,6 +440,59 @@ void FullRingInfinity::BuildSensors()
     }
   }
 }
+
+void FullRingInfinity::BuildWires()
+{
+  // Add simple detector for charge
+  G4double chdet_thickn = 1.*micrometer;
+  G4Box* chdet_solid = new G4Box("WIRE", wire_pitch_/2.,
+                                 axial_length_/2., chdet_thickn/2);
+  G4LogicalVolume* chdet_logic =
+    new G4LogicalVolume(chdet_solid, LXe_, "WIRE");
+
+  G4String sdname = "/WIRE/ChargeDet";
+  G4SDManager* sdmgr = G4SDManager::GetSDMpointer();
+  if (!sdmgr->FindSensitiveDetector(sdname, false))
+  {
+    ChargeSD* chargesd = new ChargeSD(sdname);
+    chargesd->SetTimeBinning(1.*microsecond);
+    G4SDManager::GetSDMpointer()->AddNewDetector(chargesd);
+    chdet_logic->SetSensitiveDetector(chargesd);
+  }
+
+  G4VisAttributes wire_col = nexus::Yellow();
+  wire_col.SetForceSolid(true);
+  chdet_logic->SetVisAttributes(wire_col);
+
+  G4double offset = 0.005*mm;
+  G4double chdet_radius = inner_radius_ + lxe_depth_ - chdet_thickn / 2. - offset;
+  G4int n_wires = 2. * pi * chdet_radius / wire_pitch_;
+  G4cout << "Number of wires: " << n_wires << G4endl;
+
+  G4double chdet_z_pos = 0.;
+  G4ThreeVector chdet_position(0., chdet_radius, chdet_z_pos);
+  G4int chdet_copy_no = 0;
+  G4String chdet_vol_name = "WIRE_" + std::to_string(chdet_copy_no);
+  G4RotationMatrix rot;
+  rot.rotateX(-pi / 2.);
+  new G4PVPlacement(G4Transform3D(rot, chdet_position), chdet_logic,
+                    chdet_vol_name, active_logic_, false, chdet_copy_no, false);
+
+  G4double step = 2. * pi / n_wires;
+
+  for (G4int i = 1; i < n_wires; ++i)
+    {
+      G4double angle = i * step;
+      rot.rotateZ(step);
+      chdet_position.setX(-chdet_radius * sin(angle));
+      chdet_position.setY(chdet_radius * cos(angle));
+      chdet_copy_no = chdet_copy_no + 1;
+      chdet_vol_name = "WIRE_" + std::to_string(chdet_copy_no);
+      new G4PVPlacement(G4Transform3D(rot, chdet_position), chdet_logic,
+                        chdet_vol_name, active_logic_, false, chdet_copy_no, false);
+    }
+}
+
 
 void FullRingInfinity::BuildPhantom()
 {
