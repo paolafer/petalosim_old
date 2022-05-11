@@ -74,6 +74,7 @@ private:
   G4String event_type_; ///< event type: bb0nu, bb2nu, background or not set
 
   std::vector<G4int> sns_posvec_;
+  std::vector<G4int> charge_posvec_;
 
   G4int saved_evts_;                      ///< number of events to be saved
   G4int interacting_evts_;                ///< number of events interacting in ACTIVE

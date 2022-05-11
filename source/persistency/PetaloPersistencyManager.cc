@@ -413,6 +413,17 @@ void PetaloPersistencyManager::StoreChargeHits(G4VHitsCollection* hc)
     }
 
     h5writer_->WriteChargeDataInfo(nevt_, (unsigned int)hit->GetSensorID(), charge);
+
+    std::vector<G4int>::iterator pos_it =
+      std::find(charge_posvec_.begin(), charge_posvec_.end(), hit->GetSensorID());
+    if (pos_it == charge_posvec_.end()) {
+      std::string sdname = hits->GetSDname();
+      G4ThreeVector xyz  = hit->GetPosition();
+      G4cout << "Writing " << hit->GetSensorID() << G4endl;
+      h5writer_->WriteSensorPosInfo((unsigned int)hit->GetSensorID(), sdname.c_str(),
+                                    (float)xyz.x(), (float)xyz.y(), (float)xyz.z());
+      charge_posvec_.push_back(hit->GetSensorID());
+    }
   }
 }
 
