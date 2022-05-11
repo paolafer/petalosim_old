@@ -109,6 +109,12 @@ FullRingInfinity::FullRingInfinity() :
   wire_pitch_cmd.SetParameterName("wire_pitch", false);
   wire_pitch_cmd.SetRange("wire_pitch>0.");
 
+  msg_->DeclareProperty("z_separators", n_sep_z_,
+    "Number of teflon separators in the z direction");
+
+  msg_->DeclareProperty("phi_separators", n_sep_phi_,
+    "Number of teflon separators in the phi direction");
+
   msg_->DeclareProperty("phantom", phantom_, "True if Jaszczak phantom is used");
 
   msg_->DeclarePropertyWithUnit("specific_vertex", "mm",  specific_vertex_,
@@ -456,7 +462,7 @@ void FullRingInfinity::BuildWires()
                                  axial_length_/2., chdet_thickn_/2);
   G4LogicalVolume* chdet_logic =
     new G4LogicalVolume(chdet_solid, LXe_, "WIRE");
-  
+
   G4String sdname = "/WIRE/ChargeDet";
   G4SDManager* sdmgr = G4SDManager::GetSDMpointer();
   if (!sdmgr->FindSensitiveDetector(sdname, false))
@@ -466,15 +472,15 @@ void FullRingInfinity::BuildWires()
       G4SDManager::GetSDMpointer()->AddNewDetector(chargesd);
       chdet_logic->SetSensitiveDetector(chargesd);
     }
-  
+
   G4VisAttributes wire_col = nexus::Yellow();
   wire_col.SetForceSolid(true);
   chdet_logic->SetVisAttributes(wire_col);
-  
+
   G4double chdet_radius = inner_radius_ + lxe_depth_ - chdet_thickn_ / 2. - chdet_offset_;
   G4int n_wires = 2. * pi * chdet_radius / wire_pitch_;
   G4cout << "Number of wires: " << n_wires << G4endl;
-  
+
   G4double chdet_z_pos = 0.;
   G4ThreeVector chdet_position(0., chdet_radius, chdet_z_pos);
   G4int chdet_copy_no = 0;
@@ -483,7 +489,7 @@ void FullRingInfinity::BuildWires()
   rot.rotateX(-pi / 2.);
   new G4PVPlacement(G4Transform3D(rot, chdet_position), chdet_logic,
                     chdet_vol_name, active_logic_, false, chdet_copy_no, true);
-  
+
   G4double step = 2. * pi / n_wires;
   for (G4int i = 1; i < n_wires; ++i) {
     G4double angle = i * step;
@@ -501,14 +507,14 @@ void FullRingInfinity::BuildSeparators()
 {
   // Separate LXe volume in smaller areas with teflon panels
   G4Material* teflon = G4NistManager::Instance()->FindOrBuildMaterial("G4_TEFLON");
-  
+
   //G4double arc_sep_phi = 2 * pi * (inner_radius_ + lxe_depth_) / n_sep_phi_;
   //G4int n_sipm_in_sep_phi = arc_sep_phi / sipm_pitch_;
   G4double sep_angle = 2 * pi / n_sep_phi_;
-  
+
   G4double segm_sep_z  = axial_length_ / n_sep_z_;
-  //G4double sep_pitch_z = G4int(segm_sep_z / sipm_pitch_) * sipm_pitch_; */
-  
+  //G4double sep_pitch_z = G4int(segm_sep_z / sipm_pitch_) * sipm_pitch_;
+
   G4double sep_thickn = 5.*mm;
   G4double sep_offset = 0.01*mm;
   G4double sep_size   = lxe_depth_ - chdet_thickn_ - chdet_offset_ - sep_offset;
@@ -517,7 +523,7 @@ void FullRingInfinity::BuildSeparators()
                sep_thickn/2., 0, twopi);
   G4Box* sep_phi_solid =
     new G4Box("SEPARATOR_PHI", sep_thickn/2., sep_size/2., axial_length_/2.);
-  
+
   G4double union_r = inner_radius_ + sep_size/2.;
   G4double union_z = axial_length_/2. - segm_sep_z;
   G4ThreeVector union_pos(0, union_r, union_z);
@@ -525,7 +531,7 @@ void FullRingInfinity::BuildSeparators()
                                              0, union_pos);
 
   G4RotationMatrix union_rot;
-  
+
   for (G4int i=1; i<n_sep_phi_; i++) {
     union_rot.rotateZ(sep_angle);
     G4double union_angle = i * sep_angle;
@@ -534,7 +540,7 @@ void FullRingInfinity::BuildSeparators()
     sep_solid = new G4UnionSolid("SEPARATOR", sep_solid, sep_phi_solid,
                                  G4Transform3D(union_rot, union_pos));
   }
-  
+
   union_pos = G4ThreeVector(0, 0, 0);
   for (G4int i=1; i<n_sep_z_-1; i++) {
     G4double z = i*segm_sep_z;
@@ -542,18 +548,18 @@ void FullRingInfinity::BuildSeparators()
     sep_solid = new G4UnionSolid("SEPARATOR", sep_solid, sep_z_solid,
                                  G4Transform3D(union_rot, union_pos));
   }
-  
+
   G4LogicalVolume* sep_logic =
     new G4LogicalVolume(sep_solid, teflon, "SEPARATOR");
-  
+
   new G4PVPlacement(0, G4ThreeVector(0, 0, -axial_length_/2. + segm_sep_z),
                     sep_logic, "SEPARATOR", active_logic_, false, 0, true);
-  
+
   G4OpticalSurface* teflon_optSurf =
     new G4OpticalSurface("TEFLON_OPSURF", unified, ground, dielectric_metal);
   teflon_optSurf->SetMaterialPropertiesTable(petopticalprops::PTFE());
   new G4LogicalSkinSurface("TEFLON_OPSURF", sep_logic, teflon_optSurf);
-  
+
   G4VisAttributes sep_col{{1. ,  .0 ,  .0 , .5}};
   sep_col.SetForceSolid(true);
   sep_logic->SetVisAttributes(sep_col);

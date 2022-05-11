@@ -10,9 +10,11 @@
 
 /Geometry/FullRingInfinity/charge_detector true
 /Geometry/FullRingInfinity/wire_pitch 4. mm
+/Geometry/FullRingInfinity/z_separators 10
+/Geometry/FullRingInfinity/phi_separators 10
 
 /Geometry/SiPMpet/efficiency 0.3
-/Geometry/SiPMpet/visibility true
+/Geometry/SiPMpet/visibility false
 /Geometry/SiPMpet/time_binning 5. picosecond
 /Geometry/SiPMpet/size 6. mm
 
