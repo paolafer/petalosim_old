@@ -144,6 +144,16 @@ hsize_t createStepType()
   return memtype;
 }
 
+hsize_t createChargeDataType()
+{
+  //Create compound datatype for the table
+  hsize_t memtype = H5Tcreate (H5T_COMPOUND, sizeof (charge_data_t));
+  H5Tinsert (memtype, "event_id", HOFFSET (charge_data_t, event_id), H5T_NATIVE_INT32);
+  H5Tinsert (memtype, "sensor_id" , HOFFSET (charge_data_t, sensor_id) , H5T_NATIVE_UINT);
+  H5Tinsert (memtype, "charge" , HOFFSET (charge_data_t, charge) , H5T_NATIVE_UINT);
+  return memtype;
+}
+
 hid_t createTable(hid_t group, std::string& table_name, hsize_t memtype)
 {
   //Create 1D dataspace (evt number). First dimension is unlimited (initially 0)
@@ -322,6 +332,28 @@ void writeStep(step_info_t* step, hid_t dataset, hid_t memtype, hsize_t counter)
   hsize_t count[1] = {1};
   H5Sselect_hyperslab(file_space, H5S_SELECT_SET, start, NULL, count, NULL);
   H5Dwrite(dataset, memtype, memspace, file_space, H5P_DEFAULT, step);
+  H5Sclose(file_space);
+  H5Sclose(memspace);
+}
+
+void writeChargeData(charge_data_t* chargeData, hid_t dataset, hid_t memtype, hsize_t counter)
+{
+  hid_t memspace, file_space;
+  //Create memspace for one more row
+  const hsize_t n_dims = 1;
+  hsize_t dims[n_dims] = {1};
+  memspace = H5Screate_simple(n_dims, dims, NULL);
+
+  //Extend dataset
+  dims[0] = counter+1;
+  H5Dset_extent(dataset, dims);
+
+  //Write waveforms
+  file_space = H5Dget_space(dataset);
+  hsize_t start[1] = {counter};
+  hsize_t count[1] = {1};
+  H5Sselect_hyperslab(file_space, H5S_SELECT_SET, start, NULL, count, NULL);
+  H5Dwrite(dataset, memtype, memspace, file_space, H5P_DEFAULT, chargeData);
   H5Sclose(file_space);
   H5Sclose(memspace);
 }

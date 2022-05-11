@@ -55,6 +55,7 @@ private:
   void StoreHits(G4HCofThisEvent *);
   void StoreIonizationHits(G4VHitsCollection *);
   void StoreSensorHits(G4VHitsCollection *);
+  void StoreChargeHits(G4VHitsCollection *);
   void StoreSteps();
 
   void SaveConfigurationInfo(G4String history);

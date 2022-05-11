@@ -96,6 +96,12 @@ typedef struct{
     float     final_z;
   } step_info_t;
 
+  typedef struct{
+    int32_t event_id;
+    unsigned int sensor_id;
+    unsigned int charge;
+  } charge_data_t;
+
   hsize_t createRunType();
   hsize_t createSensorDataType();
   hsize_t createSensorTofType();
@@ -103,6 +109,7 @@ typedef struct{
   hsize_t createParticleInfoType();
   hsize_t createSensorPosType();
   hsize_t createStepType();
+  hsize_t createChargeDataType();
 
   hid_t createTable(hid_t group, std::string& table_name, hsize_t memtype);
   hid_t createGroup(hid_t file, std::string& groupName);
@@ -114,6 +121,7 @@ typedef struct{
   void writeParticle(particle_info_t* particleInfo, hid_t dataset, hid_t memtype, hsize_t counter);
   void writeSnsPos(sns_pos_t* snsPos, hid_t dataset, hid_t memtype, hsize_t counter);
   void writeStep(step_info_t* step, hid_t dataset, hid_t memtype, hsize_t counter);
+  void writeChargeData(charge_data_t* chargeData, hid_t dataset, hid_t memtype, hsize_t counter);
 
 
 #endif

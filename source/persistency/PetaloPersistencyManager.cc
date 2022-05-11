@@ -9,6 +9,7 @@
 
 #include "PetaloPersistencyManager.h"
 #include "HDF5Writer.h"
+#include "ChargeSD.h"
 
 #include "nexus/Trajectory.h"
 #include "nexus/TrajectoryMap.h"
@@ -243,6 +244,8 @@ void PetaloPersistencyManager::StoreHits(G4HCofThisEvent* hce)
     }
     else if (hcname == SensorSD::GetCollectionUniqueName())
       StoreSensorHits(hits);
+    else if (hcname == ChargeSD::GetCollectionUniqueName())
+      StoreChargeHits(hits);
     else {
       G4String msg =
         "Collection of hits '" + sdname + "/" + hcname
@@ -386,6 +389,30 @@ void PetaloPersistencyManager::StoreSensorHits(G4VHitsCollection* hc)
       }
     }
     */
+  }
+}
+
+
+void PetaloPersistencyManager::StoreChargeHits(G4VHitsCollection* hc)
+{
+  ChargeHitsCollection* hits = dynamic_cast<ChargeHitsCollection*>(hc);
+  if (!hits) return;
+
+  std::vector<G4int > sensor_ids;
+  for (size_t i=0; i<hits->entries(); i++) {
+
+    ChargeHit* hit = dynamic_cast<ChargeHit*>(hits->GetHit(i));
+    if (!hit) continue;
+
+    const std::map<G4double, G4int>& wvfm = hit->GetChargeWaveform();
+    std::map<G4double, G4int>::const_iterator it;
+
+    G4double charge = 0.;
+    for (it = wvfm.begin(); it != wvfm.end(); ++it) {
+      charge += (*it).second;
+    }
+
+    h5writer_->WriteChargeDataInfo(nevt_, (unsigned int)hit->GetSensorID(), charge);
   }
 }
 
