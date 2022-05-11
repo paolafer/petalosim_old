@@ -2,7 +2,7 @@
 ### GEOMETRY
 
 /Geometry/FullRingInfinity/depth 3. cm
-/Geometry/FullRingInfinity/pitch 7. mm
+/Geometry/FullRingInfinity/sipm_pitch 7. mm
 /Geometry/FullRingInfinity/inner_radius 165. mm
 /Geometry/FullRingInfinity/sipm_rows 20
 /Geometry/FullRingInfinity/instrumented_faces 1
