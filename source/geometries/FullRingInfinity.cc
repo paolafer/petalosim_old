@@ -49,6 +49,7 @@ FullRingInfinity::FullRingInfinity() :
   instr_faces_(2),
   charge_det_(false),
   wire_pitch_(4. * mm),
+  wire_time_bin_(1.*microsecond),
   chdet_thickn_(1.*micrometer),
   chdet_offset_(0.005 * mm),
   kapton_thickn_(0.3 * mm),
@@ -108,6 +109,12 @@ FullRingInfinity::FullRingInfinity() :
   wire_pitch_cmd.SetUnitCategory("Length");
   wire_pitch_cmd.SetParameterName("wire_pitch", false);
   wire_pitch_cmd.SetRange("wire_pitch>0.");
+
+  G4GenericMessenger::Command& wire_time_cmd =
+      msg_->DeclareProperty("wire_time_bin", wire_time_bin_, "Time binning of wires");
+  wire_time_cmd.SetUnitCategory("Time");
+  wire_time_cmd.SetParameterName("wire_time_bin", false);
+  wire_time_cmd.SetRange("wire_time_bin>0.");
 
   msg_->DeclareProperty("z_separators", n_sep_z_,
     "Number of teflon separators in the z direction");
@@ -309,7 +316,7 @@ void FullRingInfinity::BuildCryostat()
     G4LogicalVolume *kapton_int_logic =
         new G4LogicalVolume(kapton_int_solid, kapton, "KAPTON");
     new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), kapton_int_logic,
-                      "KAPTON_INT", LXe_logic_, false, 0, true);
+                      "KAPTON_INT", LXe_logic_, false, 0, false);
 
     G4Tubs* kapton_ext_solid = new G4Tubs("KAPTON", inner_radius_ + wide_active_depth,
     inner_radius_ + wide_active_depth + kapton_thickn_,
@@ -317,7 +324,7 @@ void FullRingInfinity::BuildCryostat()
     G4LogicalVolume* kapton_ext_logic =
       new G4LogicalVolume(kapton_ext_solid, kapton, "KAPTON");
     new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), kapton_ext_logic,
-                    "KAPTON_EXT", LXe_logic_, false, 0, true);
+                    "KAPTON_EXT", LXe_logic_, false, 0, false);
 
     G4Tubs* kapton_lat_solid =
       new G4Tubs("KAPTON", inner_radius_ - kapton_thickn_, inner_radius_ + wide_active_depth + kapton_thickn_,
@@ -326,9 +333,9 @@ void FullRingInfinity::BuildCryostat()
       new G4LogicalVolume(kapton_lat_solid, kapton, "KAPTON");
     G4double z_pos = axial_length_ / 2. + kapton_thickn_ / 2.;
     new G4PVPlacement(0, G4ThreeVector(0., 0., z_pos), kapton_lat_logic,
-                      "KAPTON_LAT_POS", LXe_logic_, false, 0, true);
+                      "KAPTON_LAT_POS", LXe_logic_, false, 0, false);
     new G4PVPlacement(0, G4ThreeVector(0., 0., -z_pos), kapton_lat_logic,
-                      "KAPTON_LAT_NEG", LXe_logic_, false, 1, true);
+                      "KAPTON_LAT_NEG", LXe_logic_, false, 1, false);
 
     // OPTICAL SURFACE FOR REFLECTION
     G4OpticalSurface *db_opsur = new G4OpticalSurface("BORDER");
@@ -468,7 +475,7 @@ void FullRingInfinity::BuildWires()
   if (!sdmgr->FindSensitiveDetector(sdname, false))
     {
       ChargeSD* chargesd = new ChargeSD(sdname);
-      chargesd->SetTimeBinning(1.*microsecond);
+      chargesd->SetTimeBinning(wire_time_bin_);
       G4SDManager::GetSDMpointer()->AddNewDetector(chargesd);
       chdet_logic->SetSensitiveDetector(chargesd);
     }
@@ -488,7 +495,7 @@ void FullRingInfinity::BuildWires()
   G4RotationMatrix rot;
   rot.rotateX(-pi / 2.);
   new G4PVPlacement(G4Transform3D(rot, chdet_position), chdet_logic,
-                    chdet_vol_name, active_logic_, false, chdet_copy_no, true);
+                    chdet_vol_name, active_logic_, false, chdet_copy_no, false);
 
   G4double step = 2. * pi / n_wires;
   for (G4int i = 1; i < n_wires; ++i) {
@@ -499,7 +506,7 @@ void FullRingInfinity::BuildWires()
     chdet_copy_no = chdet_copy_no + 1;
     chdet_vol_name = "WIRE_" + std::to_string(chdet_copy_no);
     new G4PVPlacement(G4Transform3D(rot, chdet_position), chdet_logic,
-                      chdet_vol_name, active_logic_, false, chdet_copy_no, true);
+                      chdet_vol_name, active_logic_, false, chdet_copy_no, false);
   }
 }
 
@@ -553,7 +560,7 @@ void FullRingInfinity::BuildSeparators()
     new G4LogicalVolume(sep_solid, teflon, "SEPARATOR");
 
   new G4PVPlacement(0, G4ThreeVector(0, 0, -axial_length_/2. + segm_sep_z),
-                    sep_logic, "SEPARATOR", active_logic_, false, 0, true);
+                    sep_logic, "SEPARATOR", active_logic_, false, 0, false);
 
   G4OpticalSurface* teflon_optSurf =
     new G4OpticalSurface("TEFLON_OPSURF", unified, ground, dielectric_metal);

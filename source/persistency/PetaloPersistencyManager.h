@@ -92,7 +92,7 @@ private:
   G4bool save_tot_charge_;
   HDF5Writer *h5writer_; ///< Event writer to hdf5 file
 
-  G4double bin_size_, tof_bin_size_;
+  G4double bin_size_, tof_bin_size_, wire_bin_size_;
 };
 
 // INLINE DEFINITIONS //////////////////////////////////////////////

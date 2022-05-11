@@ -67,6 +67,7 @@ private:
   G4int instr_faces_; ///< number of instrumented faces
   G4bool charge_det_;
   G4double wire_pitch_;
+  G4double wire_time_bin_;
   G4double chdet_thickn_;
   G4double chdet_offset_;
   G4double kapton_thickn_;
