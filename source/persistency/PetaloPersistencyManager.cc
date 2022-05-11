@@ -404,12 +404,12 @@ void PetaloPersistencyManager::StoreChargeHits(G4VHitsCollection* hc)
     ChargeHit* hit = dynamic_cast<ChargeHit*>(hits->GetHit(i));
     if (!hit) continue;
 
-    double binsize = hit->GetBinSize();
+    wire_bin_size_ = hit->GetBinSize();
     const std::map<G4double, G4int>& wvfm = hit->GetChargeWaveform();
 
     std::map<G4double, G4int>::const_iterator it;
     for (it = wvfm.begin(); it != wvfm.end(); ++it) {
-      unsigned int time_bin = (unsigned int)((*it).first/binsize+0.5);
+      unsigned int time_bin = (unsigned int)((*it).first/wire_bin_size_+0.5);
       unsigned int charge   = (unsigned int)((*it).second+0.5);
       h5writer_->WriteChargeDataInfo(nevt_, (unsigned int)hit->GetSensorID(), time_bin, charge);
     }
@@ -420,7 +420,6 @@ void PetaloPersistencyManager::StoreChargeHits(G4VHitsCollection* hc)
     if (pos_it == charge_posvec_.end()) {
       std::string sdname = hits->GetSDname();
       G4ThreeVector xyz  = hit->GetPosition();
-      G4cout << "Writing " << hit->GetSensorID() << G4endl;
       h5writer_->WriteSensorPosInfo((unsigned int)hit->GetSensorID(), sdname.c_str(),
                                     (float)xyz.x(), (float)xyz.y(), (float)xyz.z());
       charge_posvec_.push_back(hit->GetSensorID());
@@ -474,6 +473,8 @@ G4bool PetaloPersistencyManager::Store(const G4Run*)
   h5writer_->WriteRunInfo(key, std::to_string(saved_evts_).c_str());
   key = "tof_bin_size";
   h5writer_->WriteRunInfo(key, (std::to_string(tof_bin_size_/picosecond)+" ps").c_str());
+  key = "wire_bin_size";
+  h5writer_->WriteRunInfo(key, (std::to_string(wire_bin_size_/microsecond)+" us").c_str());
 
   if (save_int_e_numb_) {
      key = "interacting_events";

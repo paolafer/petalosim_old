@@ -47,6 +47,7 @@ FullRingInfinity::FullRingInfinity() :
   instr_faces_(2),
   charge_det_(false),
   wire_pitch_(4. * mm),
+  wire_time_bin_(1.*microsecond),
   kapton_thickn_(0.3 * mm),
   lxe_depth_(5. * cm),
   offset_(0.1 * mm),
@@ -102,6 +103,12 @@ FullRingInfinity::FullRingInfinity() :
   wire_pitch_cmd.SetUnitCategory("Length");
   wire_pitch_cmd.SetParameterName("wire_pitch", false);
   wire_pitch_cmd.SetRange("wire_pitch>0.");
+
+  G4GenericMessenger::Command& wire_time_cmd =
+      msg_->DeclareProperty("wire_time_bin", wire_time_bin_, "Time binning of wires");
+  wire_time_cmd.SetUnitCategory("Time");
+  wire_time_cmd.SetParameterName("wire_time_bin", false);
+  wire_time_cmd.SetRange("wire_time_bin>0.");
 
   msg_->DeclareProperty("phantom", phantom_, "True if Jaszczak phantom is used");
 
@@ -454,7 +461,7 @@ void FullRingInfinity::BuildWires()
   if (!sdmgr->FindSensitiveDetector(sdname, false))
   {
     ChargeSD* chargesd = new ChargeSD(sdname);
-    chargesd->SetTimeBinning(1.*microsecond);
+    chargesd->SetTimeBinning(wire_time_bin_);
     G4SDManager::GetSDMpointer()->AddNewDetector(chargesd);
     chdet_logic->SetSensitiveDetector(chargesd);
   }
