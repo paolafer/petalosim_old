@@ -44,8 +44,8 @@ private:
   void BuildCryostat();
   void BuildQuadSensors();
   void BuildSensors();
-  void BuildWires(G4double sep_angle);
-  G4double BuildSeparators();
+  void BuildWires();
+  void BuildSeparators();
   void BuildPhantom();
   void BuildPointfile(G4String pointFile);
   G4int binarySearchPt(G4int low, G4int high, G4double rnd) const;
