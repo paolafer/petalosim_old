@@ -43,7 +43,7 @@ def test_create_nexus_output_file_full_body(config_tmpdir, output_tmpdir, PETALO
 /process/em/verbose 0
 
 /Geometry/FullRingInfinity/depth 3. cm
-/Geometry/FullRingInfinity/pitch 7. mm
+/Geometry/FullRingInfinity/sipm_pitch 7. mm
 /Geometry/FullRingInfinity/inner_radius 380. mm
 /Geometry/FullRingInfinity/sipm_rows 278
 /Geometry/FullRingInfinity/instrumented_faces 1
