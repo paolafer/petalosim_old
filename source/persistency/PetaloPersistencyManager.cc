@@ -404,15 +404,16 @@ void PetaloPersistencyManager::StoreChargeHits(G4VHitsCollection* hc)
     ChargeHit* hit = dynamic_cast<ChargeHit*>(hits->GetHit(i));
     if (!hit) continue;
 
+    double binsize = hit->GetBinSize();
     const std::map<G4double, G4int>& wvfm = hit->GetChargeWaveform();
-    std::map<G4double, G4int>::const_iterator it;
 
-    G4double charge = 0.;
+    std::map<G4double, G4int>::const_iterator it;
     for (it = wvfm.begin(); it != wvfm.end(); ++it) {
-      charge += (*it).second;
+      unsigned int time_bin = (unsigned int)((*it).first/binsize+0.5);
+      unsigned int charge   = (unsigned int)((*it).second+0.5);
+      h5writer_->WriteChargeDataInfo(nevt_, (unsigned int)hit->GetSensorID(), time_bin, charge);
     }
 
-    h5writer_->WriteChargeDataInfo(nevt_, (unsigned int)hit->GetSensorID(), charge);
 
     std::vector<G4int>::iterator pos_it =
       std::find(charge_posvec_.begin(), charge_posvec_.end(), hit->GetSensorID());

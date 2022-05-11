@@ -150,6 +150,7 @@ hsize_t createChargeDataType()
   hsize_t memtype = H5Tcreate (H5T_COMPOUND, sizeof (charge_data_t));
   H5Tinsert (memtype, "event_id", HOFFSET (charge_data_t, event_id), H5T_NATIVE_INT32);
   H5Tinsert (memtype, "sensor_id" , HOFFSET (charge_data_t, sensor_id) , H5T_NATIVE_UINT);
+  H5Tinsert (memtype, "time_bin" , HOFFSET (charge_data_t, time_bin) , H5T_NATIVE_UINT);
   H5Tinsert (memtype, "charge" , HOFFSET (charge_data_t, charge) , H5T_NATIVE_UINT);
   return memtype;
 }
